@@ -1,59 +1,78 @@
 name: Release
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches:
       - main
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      # 1️⃣ Checkout repo with full history and disable default credentials
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          persist-credentials: false # prevents Actions bot token from being used
+          persist-credentials: false
 
-      # 2️⃣ Set up Node.js with Yarn caching
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: "yarn"
           registry-url: "https://registry.npmjs.org"
 
-      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      # 4️⃣ Lint
-      - name: Lint
-        run: yarn lint
-
-      # 5️⃣ Build package
       - name: Build
         run: yarn build
 
-      # 6️⃣ Clean untracked files to prevent branch switching errors
       - name: Clean untracked files
         run: git clean -fdX
 
-      # 7️⃣ Configure git remote to use your PAT
-      - name: Configure git remote with PAT
+      - name: Configure Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Configure Git remote with PAT
         run: git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
 
-      # 8️⃣ Publish package, commit version bump & changelog directly to main, create GitHub release
-      - name: Publish package
-        uses: changesets/action@v1
-        with:
-          publish: npm
-          version: true # Commit version bump & CHANGELOG.md
-          commitMode: git-cli # Commit directly to main
-          createGithubReleases: true # GitHub release
-          setupGitUser: true # Sets author/committer
+      - name: Version packages
+        id: version
+        run: |
+          yarn changeset version
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            VERSION=$(node -p "require('./package.json').version")
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit version changes
+        if: steps.version.outputs.has_changes == 'true'
+        run: |
+          git add .
+          git commit -m "Release v${{ steps.version.outputs.version }} [skip ci]"
+          git push origin main
+
+      - name: Publish to npm
+        if: steps.version.outputs.has_changes == 'true'
+        run: yarn changeset publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub release
+        if: steps.version.outputs.has_changes == 'true'
+        uses: changesets/action@v1
+        with:
+          createGithubReleases: true
+        env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
