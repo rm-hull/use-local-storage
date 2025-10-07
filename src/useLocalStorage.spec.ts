@@ -1,7 +1,627 @@
+import { renderHook, act, waitFor } from "@testing-library/react";
+import { vi } from "vitest";
 import { useLocalStorage } from "./useLocalStorage";
 
 describe("useLocalStorage", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+  });
+
   it("should be defined", () => {
     expect(useLocalStorage).toBeDefined();
+  });
+
+  describe("Initial State", () => {
+    it("should start with isLoading true", () => {
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      expect(result.current.isLoading).toBe(true);
+    });
+
+    it("should set isLoading to false after initialization", async () => {
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+    });
+
+    it("should return undefined value when key does not exist", async () => {
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toBeUndefined();
+    });
+
+    it("should read initial value from localStorage", async () => {
+      localStorage.setItem("test-key", JSON.stringify("initial-value"));
+
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toBe("initial-value");
+    });
+
+    it("should handle complex objects", async () => {
+      const complexObject = {
+        name: "John",
+        age: 30,
+        hobbies: ["reading", "coding"],
+      };
+      localStorage.setItem("test-key", JSON.stringify(complexObject));
+
+      const { result } = renderHook(() =>
+        useLocalStorage<typeof complexObject>("test-key")
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toEqual(complexObject);
+    });
+
+    it("should handle arrays", async () => {
+      const array = [1, 2, 3, 4, 5];
+      localStorage.setItem("test-key", JSON.stringify(array));
+
+      const { result } = renderHook(() =>
+        useLocalStorage<number[]>("test-key")
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toEqual(array);
+    });
+
+    it("should handle boolean values", async () => {
+      localStorage.setItem("test-key", JSON.stringify(true));
+
+      const { result } = renderHook(() => useLocalStorage<boolean>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toBe(true);
+    });
+
+    it("should handle number values", async () => {
+      localStorage.setItem("test-key", JSON.stringify(42));
+
+      const { result } = renderHook(() => useLocalStorage<number>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toBe(42);
+    });
+
+    it("should handle null values", async () => {
+      localStorage.setItem("test-key", JSON.stringify(null));
+
+      const { result } = renderHook(() => useLocalStorage<null>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toBeNull();
+    });
+  });
+
+  describe("setValue", () => {
+    it("should provide a setValue function", () => {
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      expect(typeof result.current.setValue).toBe("function");
+    });
+
+    it("should update the value in localStorage", async () => {
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue("new-value");
+      });
+
+      const storedValue = localStorage.getItem("test-key");
+      expect(storedValue).toBe(JSON.stringify("new-value"));
+    });
+
+    it("should update the hook value when setValue is called", async () => {
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue("new-value");
+      });
+
+      await waitFor(() => {
+        expect(result.current.value).toBe("new-value");
+      });
+    });
+
+    it("should remove value from localStorage when setValue is called with undefined", async () => {
+      localStorage.setItem("test-key", JSON.stringify("initial-value"));
+
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue(undefined);
+      });
+
+      expect(localStorage.getItem("test-key")).toBeNull();
+    });
+
+    it("should update the hook value to undefined when setValue is called with undefined", async () => {
+      localStorage.setItem("test-key", JSON.stringify("initial-value"));
+
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.value).toBe("initial-value");
+      });
+
+      act(() => {
+        result.current.setValue(undefined);
+      });
+
+      await waitFor(() => {
+        expect(result.current.value).toBeUndefined();
+      });
+    });
+
+    it("should handle setting complex objects", async () => {
+      const { result } = renderHook(() =>
+        useLocalStorage<{ name: string; age: number }>("test-key")
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      const newValue = { name: "Jane", age: 25 };
+
+      act(() => {
+        result.current.setValue(newValue);
+      });
+
+      await waitFor(() => {
+        expect(result.current.value).toEqual(newValue);
+      });
+
+      expect(localStorage.getItem("test-key")).toBe(JSON.stringify(newValue));
+    });
+
+    it("should dispatch custom local-storage event", async () => {
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      const eventListener = vi.fn();
+      window.addEventListener("local-storage", eventListener);
+
+      act(() => {
+        result.current.setValue("test-value");
+      });
+
+      expect(eventListener).toHaveBeenCalled();
+
+      window.removeEventListener("local-storage", eventListener);
+    });
+  });
+
+  describe("Event Listeners", () => {
+    it("should listen to storage events", async () => {
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        localStorage.setItem("test-key", JSON.stringify("external-value"));
+        window.dispatchEvent(new Event("storage"));
+      });
+
+      await waitFor(() => {
+        expect(result.current.value).toBe("external-value");
+      });
+    });
+
+    it("should listen to custom local-storage events", async () => {
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        localStorage.setItem("test-key", JSON.stringify("custom-event-value"));
+        window.dispatchEvent(new Event("local-storage"));
+      });
+
+      await waitFor(() => {
+        expect(result.current.value).toBe("custom-event-value");
+      });
+    });
+
+    it("should clean up event listeners on unmount", async () => {
+      const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
+
+      const { unmount } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      unmount();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "storage",
+        expect.any(Function)
+      );
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "local-storage",
+        expect.any(Function)
+      );
+
+      removeEventListenerSpy.mockRestore();
+    });
+
+    it("should update event listeners when key changes", async () => {
+      const { result, rerender } = renderHook(
+        ({ key }) => useLocalStorage<string>(key),
+        { initialProps: { key: "key1" } }
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue("value1");
+      });
+
+      await waitFor(() => {
+        expect(result.current.value).toBe("value1");
+      });
+
+      rerender({ key: "key2" });
+
+      await waitFor(() => {
+        expect(result.current.value).toBeUndefined();
+      });
+
+      act(() => {
+        localStorage.setItem("key2", JSON.stringify("value2"));
+        window.dispatchEvent(new Event("local-storage"));
+      });
+
+      await waitFor(() => {
+        expect(result.current.value).toBe("value2");
+      });
+    });
+  });
+
+  describe("Multiple Hooks", () => {
+    it("should sync multiple hooks with the same key", async () => {
+      const { result: result1 } = renderHook(() =>
+        useLocalStorage<string>("shared-key")
+      );
+      const { result: result2 } = renderHook(() =>
+        useLocalStorage<string>("shared-key")
+      );
+
+      await waitFor(() => {
+        expect(result1.current.isLoading).toBe(false);
+        expect(result2.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result1.current.setValue("shared-value");
+      });
+
+      await waitFor(() => {
+        expect(result1.current.value).toBe("shared-value");
+        expect(result2.current.value).toBe("shared-value");
+      });
+    });
+
+    it("should not interfere with hooks using different keys", async () => {
+      const { result: result1 } = renderHook(() =>
+        useLocalStorage<string>("key1")
+      );
+      const { result: result2 } = renderHook(() =>
+        useLocalStorage<string>("key2")
+      );
+
+      await waitFor(() => {
+        expect(result1.current.isLoading).toBe(false);
+        expect(result2.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result1.current.setValue("value1");
+      });
+
+      await waitFor(() => {
+        expect(result1.current.value).toBe("value1");
+      });
+
+      expect(result2.current.value).toBeUndefined();
+
+      act(() => {
+        result2.current.setValue("value2");
+      });
+
+      await waitFor(() => {
+        expect(result2.current.value).toBe("value2");
+      });
+
+      expect(result1.current.value).toBe("value1");
+    });
+  });
+
+  describe("Error Handling", () => {
+    it("should handle JSON parse errors gracefully", async () => {
+      localStorage.setItem("test-key", "invalid-json{");
+
+      expect(() => {
+        renderHook(() => useLocalStorage<string>("test-key"));
+      }).toThrow();
+    });
+
+    it("should handle localStorage.setItem errors", async () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      const setItemSpy = vi
+        .spyOn(Storage.prototype, "setItem")
+        .mockImplementation(() => {
+          throw new Error("Storage quota exceeded");
+        });
+
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue("test-value");
+      });
+
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      const errorCall = consoleErrorSpy.mock.calls[0];
+      expect(errorCall[0]).toContain("Error setting localStorage key");
+      expect(errorCall[1]).toBeInstanceOf(Error);
+
+      setItemSpy.mockRestore();
+      consoleErrorSpy.mockRestore();
+    });
+  });
+
+  describe("setValue Callback Stability", () => {
+    it("should maintain setValue reference when key does not change", async () => {
+      const { result, rerender } = renderHook(() =>
+        useLocalStorage<string>("test-key")
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      const firstSetValue = result.current.setValue;
+
+      rerender();
+
+      expect(result.current.setValue).toBe(firstSetValue);
+    });
+
+    it("should update setValue reference when key changes", async () => {
+      const { result, rerender } = renderHook(
+        ({ key }) => useLocalStorage<string>(key),
+        { initialProps: { key: "key1" } }
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      const firstSetValue = result.current.setValue;
+
+      rerender({ key: "key2" });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.setValue).not.toBe(firstSetValue);
+    });
+  });
+
+  describe("Edge Cases", () => {
+    it("should handle empty string values", async () => {
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue("");
+      });
+
+      await waitFor(
+        () => {
+          expect(result.current.value).toBe("");
+        },
+        { timeout: 2000 }
+      );
+
+      expect(localStorage.getItem("test-key")).toBe(JSON.stringify(""));
+    });
+
+    it("should handle zero values", async () => {
+      const { result } = renderHook(() => useLocalStorage<number>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue(0);
+      });
+
+      await waitFor(
+        () => {
+          expect(result.current.value).toBe(0);
+        },
+        { timeout: 2000 }
+      );
+
+      expect(localStorage.getItem("test-key")).toBe(JSON.stringify(0));
+    });
+
+    it("should handle false boolean values", async () => {
+      const { result } = renderHook(() => useLocalStorage<boolean>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue(false);
+      });
+
+      await waitFor(
+        () => {
+          expect(result.current.value).toBe(false);
+        },
+        { timeout: 2000 }
+      );
+
+      expect(localStorage.getItem("test-key")).toBe(JSON.stringify(false));
+    });
+
+    it("should handle rapid successive setValue calls", async () => {
+      const { result } = renderHook(() => useLocalStorage<number>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue(1);
+        result.current.setValue(2);
+        result.current.setValue(3);
+      });
+
+      await waitFor(
+        () => {
+          expect(result.current.value).toBe(3);
+        },
+        { timeout: 2000 }
+      );
+
+      expect(localStorage.getItem("test-key")).toBe(JSON.stringify(3));
+    });
+
+    it("should handle special characters in keys", async () => {
+      const specialKey = "test-key:with@special#characters$";
+      const { result } = renderHook(() => useLocalStorage<string>(specialKey));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue("test-value");
+      });
+
+      await waitFor(
+        () => {
+          expect(result.current.value).toBe("test-value");
+        },
+        { timeout: 2000 }
+      );
+
+      expect(localStorage.getItem(specialKey)).toBe(
+        JSON.stringify("test-value")
+      );
+    });
+
+    it("should handle very long strings", async () => {
+      const longString = "a".repeat(10000);
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue(longString);
+      });
+
+      await waitFor(
+        () => {
+          expect(result.current.value).toBe(longString);
+        },
+        { timeout: 2000 }
+      );
+    });
+
+    it("should handle nested objects", async () => {
+      const nestedObject = {
+        level1: {
+          level2: {
+            level3: {
+              value: "deep",
+            },
+          },
+        },
+      };
+
+      const { result } = renderHook(() =>
+        useLocalStorage<typeof nestedObject>("test-key")
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue(nestedObject);
+      });
+
+      await waitFor(
+        () => {
+          expect(result.current.value).toEqual(nestedObject);
+        },
+        { timeout: 2000 }
+      );
+    });
   });
 });
