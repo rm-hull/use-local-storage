@@ -8,6 +8,8 @@ pnpm-debug.log*
 lerna-debug.log*
 
 .yarn/install-state.gz
+.yarn/cache
+.yarn/unplugged
 
 node_modules
 dist

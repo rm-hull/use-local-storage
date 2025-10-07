@@ -34,6 +34,19 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Verify PAT
+        run: |
+          git config --global user.name "GitHub Actions Test"
+          git config --global user.email "actions@github.com"
+          echo "Testing if we can push to main..."
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          git fetch origin
+          git branch -f test-pat-check origin/main
+          git checkout test-pat-check
+          echo "✅ PAT works, can checkout main branch"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
       # Publish and commit version bump + changelog directly on main
       - name: Publish package
         uses: changesets/action@v1
