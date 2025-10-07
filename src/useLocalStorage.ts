@@ -21,6 +21,10 @@ function readValue<T>(key: string): T | undefined {
 }
 
 function setValue<T>(key: string, value?: T) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
   try {
     if (value === undefined) {
       window.localStorage.removeItem(key);
@@ -30,7 +34,7 @@ function setValue<T>(key: string, value?: T) {
 
     window.dispatchEvent(new Event("local-storage"));
   } catch (error) {
-    console.error(`Error setting localStorage key “${key}”:`, error);
+    console.error(`Error setting localStorage key "${key}":`, error);
   }
 }
 
@@ -47,15 +51,19 @@ export const useLocalStorage = <T>(
       setStoredValue((prev) => ({ ...(prev ?? {}), [key]: readValue(key) }));
     };
 
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("local-storage", handleStorageChange);
+    if (typeof window !== "undefined") {
+      window.addEventListener("storage", handleStorageChange);
+      window.addEventListener("local-storage", handleStorageChange);
+    }
 
-    // Defer setIsLoading to avoid cascading renders
-    setTimeout(() => setIsLoading(false), 0);
+    const timeoutId = setTimeout(() => setIsLoading(false), 0);
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("local-storage", handleStorageChange);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("storage", handleStorageChange);
+        window.removeEventListener("local-storage", handleStorageChange);
+      }
+      clearTimeout(timeoutId);
     };
   }, [key, setStoredValue]);
 
