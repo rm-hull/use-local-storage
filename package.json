@@ -2,6 +2,7 @@
   "name": "@rm-hull/use-local-storage",
   "version": "0.0.4",
   "description": "A React hook for syncing state with localStorage",
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
