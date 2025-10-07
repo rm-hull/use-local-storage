@@ -34,6 +34,12 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Configure git remote with PAT
+        run: |
+          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+
       - name: Verify PAT
         run: |
           git config --global user.name "GitHub Actions Test"
