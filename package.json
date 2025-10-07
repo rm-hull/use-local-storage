@@ -1,6 +1,6 @@
 {
   "name": "@rm-hull/use-local-storage",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A React hook for syncing state with localStorage",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
