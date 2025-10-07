@@ -35,20 +35,18 @@ This project uses [**Changesets**](https://github.com/changesets/changesets) to 
    git push -u origin feature/my-change
    ```
 
-3. **Open a Pull Request into `main`**
+3. **Merge the feature branch into `main`**
 
-   The PR should include your code changes and the changeset file. The GitHub Action will detect the changeset and automatically open a **Version Packages** PR. This PR:
+   - Once your PR is reviewed, merge it into `main`. The `.changeset` file must be present in `main` for the next step.
 
-   - Updates the version in `package.json`
-   - Updates the changelog
-   - Prepares the release
+4. **Automatic version bump and publish**
 
-4. **Merge the Version Packages PR**
+   - When changes are pushed to `main`, GitHub Actions will automatically:
 
-   Once merged into `main`, the workflow will:
-
-   - Build the package
-   - Publish the new version to npm as [`@rm-hull/use-local-storage`](https://www.npmjs.com/package/@rm-hull/use-local-storage)
+     - Build the package
+     - Apply version bumps based on the `.changeset` file
+     - Update the changelog
+     - Publish the new version to npm as [`@rm-hull/use-local-storage`](https://www.npmjs.com/package/@rm-hull/use-local-storage)
 
 5. **That’s it!** 🎉
    Your package is now live on npm with an updated version and changelog.
@@ -59,5 +57,5 @@ This project uses [**Changesets**](https://github.com/changesets/changesets) to 
 
 - The npm publish step is automated via GitHub Actions (`.github/workflows/release.yml`).
 - Ensure your `NPM_TOKEN` secret is configured in the repository settings under **Settings → Secrets → Actions**.
-- Only maintainers with permission to publish to npm should merge the Version Packages PR.
 - Changesets should always be created on feature branches, not directly on `main`.
+- No pull requests are created for version bumps; merging your feature branch into `main` triggers the release automatically.
