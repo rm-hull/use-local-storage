@@ -10,23 +10,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repo with full history for tagging
+      # Checkout repo with full history for proper tagging
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      # Set up Node.js
+      # Set up Node.js with caching
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: "yarn"
           registry-url: "https://registry.npmjs.org"
 
-      # Yarn install with caching
+      # Install dependencies
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      # Run lint
+      # Lint
       - name: Lint
         run: yarn lint
 
@@ -34,13 +34,13 @@ jobs:
       - name: Build
         run: yarn build
 
-      # Publish package, commit version bump + changelog, create release
+      # Publish package, commit version bump & changelog, create release
       - name: Publish package
         uses: changesets/action@v1
         with:
           publish: npm
           version: true # Commit version bumps & changelog
-          createGithubReleases: true # GitHub release
+          createGithubReleases: true # Create GitHub release
           setupGitUser: true # Set git author for commits
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
