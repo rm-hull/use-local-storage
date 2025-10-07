@@ -10,70 +10,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout full history for tagging
+      # 1️⃣ Checkout repo with full history, disable default credentials
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      # Node.js setup with Yarn cache
+      # 2️⃣ Set up Node.js with Yarn cache
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: "yarn"
           registry-url: "https://registry.npmjs.org"
 
-      # Install dependencies
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      # Lint
+      # 4️⃣ Lint
       - name: Lint
         run: yarn lint
 
-      # Build
+      # 5️⃣ Build package
       - name: Build
         run: yarn build
 
+      # 6️⃣ Clean untracked files to avoid branch switching issues
+      - name: Clean untracked files
+        run: git clean -fdX
+
+      # 7️⃣ Configure git remote to use PAT for pushing
       - name: Configure git remote with PAT
-        run: |
-          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git
+        run: git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
 
-      - name: Verify PAT
-        run: |
-          git config --global user.name "GitHub Actions Test"
-          git config --global user.email "actions@github.com"
-          echo "Testing if we can push to main..."
-          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git
-          git fetch origin
-          git branch -f test-pat-check origin/main
-          git checkout test-pat-check
-          echo "✅ PAT works, can checkout main branch"
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-
-      - name: Test commit with PAT
-        run: |
-          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git
-          git checkout -b pat-test
-          echo "# PAT test $(date)" >> PAT_TEST.md
-          git add PAT_TEST.md
-          git commit -m "Test PAT write access"
-          git push origin pat-test --force
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-
-      # Publish and commit version bump + changelog directly on main
+      # 8️⃣ Publish package and commit version bump + changelog
       - name: Publish package
         uses: changesets/action@v1
         with:
           publish: npm
-          version: true # Commit version bumps & changelog
-          commitMode: git-cli # Use direct git commit, no PR branch
+          version: true # Commit version bumps & CHANGELOG.md
+          commitMode: git-cli # Direct git commit to main
           createGithubReleases: true # GitHub release
-          setupGitUser: true
+          setupGitUser: true # Set git author
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
