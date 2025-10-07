@@ -1,7 +1,11 @@
 import { atom, useAtom } from "jotai";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-const localStorage = atom<Record<string, unknown> | undefined>(undefined);
+const localStorageAtom = atom<Record<string, unknown> | undefined>(undefined);
+
+function isEqual(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
 
 type UseLocalStorageReturnType<T> = {
   value?: T;
@@ -42,13 +46,30 @@ export const useLocalStorage = <T>(
   key: string
 ): UseLocalStorageReturnType<T> => {
   const [isLoading, setIsLoading] = useState(true);
-  const [storedValue, setStoredValue] = useAtom(localStorage);
+  const [storedValue, setStoredValue] = useAtom(localStorageAtom);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
-    setStoredValue((prev) => ({ ...(prev ?? {}), [key]: readValue(key) }));
+    const updateValue = (newValue: T | undefined) => {
+      setStoredValue((prev) => {
+        const currentValue = prev?.[key];
+        if (isEqual(currentValue, newValue)) {
+          return prev ?? {};
+        }
+        return { ...(prev ?? {}), [key]: newValue };
+      });
+    };
+
+    updateValue(readValue<T>(key));
 
     const handleStorageChange = (): void => {
-      setStoredValue((prev) => ({ ...(prev ?? {}), [key]: readValue(key) }));
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+
+      debounceTimeoutRef.current = setTimeout(() => {
+        updateValue(readValue<T>(key));
+      }, 50);
     };
 
     if (typeof window !== "undefined") {
@@ -64,6 +85,9 @@ export const useLocalStorage = <T>(
         window.removeEventListener("local-storage", handleStorageChange);
       }
       clearTimeout(timeoutId);
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
     };
   }, [key, setStoredValue]);
 
