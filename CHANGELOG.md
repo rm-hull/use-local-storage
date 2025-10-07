@@ -1,5 +1,11 @@
 # @rm-hull/use-local-storage
 
+## 0.0.4
+
+### Patch Changes
+
+- 2cf2e73: package.json main/module were pointing to non-existent files
+
 ## 0.0.3
 
 ### Patch Changes
