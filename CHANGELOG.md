@@ -1,5 +1,11 @@
 # @rm-hull/use-local-storage
 
+## 0.1.0
+
+### Minor Changes
+
+- f4528d5: First proper release
+
 ## 0.0.5
 
 ### Patch Changes
