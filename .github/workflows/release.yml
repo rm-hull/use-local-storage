@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repo with full history for proper tagging
+      # Checkout full history for tagging
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      # Set up Node.js with caching
+      # Node.js setup with Yarn cache
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -30,18 +30,19 @@ jobs:
       - name: Lint
         run: yarn lint
 
-      # Build package
+      # Build
       - name: Build
         run: yarn build
 
-      # Publish package, commit version bump & changelog, create release
+      # Publish and commit version bump + changelog directly on main
       - name: Publish package
         uses: changesets/action@v1
         with:
           publish: npm
           version: true # Commit version bumps & changelog
-          createGithubReleases: true # Create GitHub release
-          setupGitUser: true # Set git author for commits
+          commitMode: git-cli # Use direct git commit, no PR branch
+          createGithubReleases: true # GitHub release
+          setupGitUser: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
