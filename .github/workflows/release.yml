@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo with full history, disable default credentials
+      # 1️⃣ Checkout repo with full history and disable default credentials
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          persist-credentials: false
+          persist-credentials: false # prevents Actions bot token from being used
 
-      # 2️⃣ Set up Node.js with Yarn cache
+      # 2️⃣ Set up Node.js with Yarn caching
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -35,25 +35,25 @@ jobs:
       - name: Build
         run: yarn build
 
-      # 6️⃣ Clean untracked files to avoid branch switching issues
+      # 6️⃣ Clean untracked files to prevent branch switching errors
       - name: Clean untracked files
         run: git clean -fdX
 
-      # 7️⃣ Configure git remote to use PAT for pushing
+      # 7️⃣ Configure git remote to use your PAT
       - name: Configure git remote with PAT
         run: git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
 
-      # 8️⃣ Publish package and commit version bump + changelog
+      # 8️⃣ Publish package, commit version bump & changelog directly to main, create GitHub release
       - name: Publish package
         uses: changesets/action@v1
         with:
           publish: npm
-          version: true # Commit version bumps & CHANGELOG.md
-          commitMode: git-cli # Direct git commit to main
+          version: true # Commit version bump & CHANGELOG.md
+          commitMode: git-cli # Commit directly to main
           createGithubReleases: true # GitHub release
-          setupGitUser: true # Set git author
+          setupGitUser: true # Sets author/committer
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
