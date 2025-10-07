@@ -47,6 +47,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
+      - name: Test commit with PAT
+        run: |
+          git checkout -b pat-test
+          echo "# PAT test $(date)" >> PAT_TEST.md
+          git add PAT_TEST.md
+          git commit -m "Test PAT write access"
+          git push origin pat-test --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
       # Publish and commit version bump + changelog directly on main
       - name: Publish package
         uses: changesets/action@v1
