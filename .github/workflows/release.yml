@@ -36,9 +36,9 @@ jobs:
 
       - name: Configure git remote with PAT
         run: |
-          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Verify PAT
         run: |
@@ -55,6 +55,7 @@ jobs:
 
       - name: Test commit with PAT
         run: |
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
           git checkout -b pat-test
           echo "# PAT test $(date)" >> PAT_TEST.md
           git add PAT_TEST.md
