@@ -1,4 +1,9 @@
-# use-local-storage
+# use-local-storage 
+![NPM Version](https://img.shields.io/npm/v/%40rm-hull%2Fuse-local-storage)
+![Coveralls](https://img.shields.io/coverallsCoverage/github/rm-hull/use-local-storage)
+![NPM Downloads](https://img.shields.io/npm/dm/%40rm-hull%2Fuse-local-storage)
+
+
 
 A type-safe React hook for syncing state with `localStorage` that automatically keeps your data in sync across browser tabs and handles SSR gracefully. Built with [Jotai](https://jotai.org/) for efficient state management.
 
