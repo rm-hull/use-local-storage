@@ -7,12 +7,6 @@ function isEqual(a: unknown, b: unknown): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-type UseLocalStorageReturnType<T> = {
-  value?: T;
-  setValue: (value?: T) => void;
-  isLoading: boolean;
-};
-
 function readValue<T>(key: string): T | undefined {
   if (typeof window === "undefined") {
     return undefined;
@@ -42,12 +36,12 @@ function setValue<T>(key: string, value?: T) {
   }
 }
 
-export const useLocalStorage = <T>(
-  key: string
-): UseLocalStorageReturnType<T> => {
+export const useLocalStorage = <T>(key: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const [storedValue, setStoredValue] = useAtom(localStorageAtom);
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     const updateValue = (newValue: T | undefined) => {
