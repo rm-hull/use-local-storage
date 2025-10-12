@@ -19,7 +19,8 @@ describe("useLocalStorage", () => {
   describe("Initial State", () => {
     it("should start with isLoading true", () => {
       const { result } = renderHook(() => useLocalStorage<string>("test-key"));
-      expect(result.current.isLoading).toBe(true);
+      const { isLoading } = result.current;
+      expect(isLoading).toBe(true);
     });
 
     it("should set isLoading to false after initialization", async () => {
