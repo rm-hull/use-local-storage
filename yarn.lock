@@ -1552,11 +1552,11 @@ __metadata:
   linkType: hard
 
 "@vitest/coverage-v8@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@vitest/coverage-v8@npm:4.0.0"
+  version: 4.0.1
+  resolution: "@vitest/coverage-v8@npm:4.0.1"
   dependencies:
     "@bcoe/v8-coverage": "npm:^1.0.2"
-    "@vitest/utils": "npm:4.0.0"
+    "@vitest/utils": "npm:4.0.1"
     ast-v8-to-istanbul: "npm:^0.3.5"
     debug: "npm:^4.4.3"
     istanbul-lib-coverage: "npm:^3.2.2"
@@ -1567,12 +1567,12 @@ __metadata:
     std-env: "npm:^3.9.0"
     tinyrainbow: "npm:^3.0.3"
   peerDependencies:
-    "@vitest/browser": 4.0.0
-    vitest: 4.0.0
+    "@vitest/browser": 4.0.1
+    vitest: 4.0.1
   peerDependenciesMeta:
     "@vitest/browser":
       optional: true
-  checksum: 10c0/7c490c85dd8dd5d60592344c01e6d6d43efbd587cf265202a3b0342170d3b065d0813433e4b2035b7184f88bdc696216d3ec2c7dbc5e3df9b7c8231e3dbb0692
+  checksum: 10c0/d61cf8a661bd82d41264271d411be210cf1aea2616af0dd4b5b1e6269be1b161a2226606ecf072b8e39b397d15040ca6322e4d7f0d211db42712220653ea5bd6
   languageName: node
   linkType: hard
 
@@ -1606,15 +1606,6 @@ __metadata:
     vite:
       optional: true
   checksum: 10c0/c175efb88598ae5c71f1e8f1957fb47126648227e3cde28d385b3fde21acccc44195d3c70f3a1b2e2a128b2e809c8498ed8906701bc41fa373e72f4fe2c204f8
-  languageName: node
-  linkType: hard
-
-"@vitest/pretty-format@npm:4.0.0":
-  version: 4.0.0
-  resolution: "@vitest/pretty-format@npm:4.0.0"
-  dependencies:
-    tinyrainbow: "npm:^3.0.3"
-  checksum: 10c0/200cbded31157e6d6c8dca744e4cf32bd003e17f90368ef02d310460cdf56aa4a884a29e62dd0a2763ee0866f3ba368aa935ec35929f5f40db28724967feaeb2
   languageName: node
   linkType: hard
 
@@ -1652,16 +1643,6 @@ __metadata:
   version: 4.0.1
   resolution: "@vitest/spy@npm:4.0.1"
   checksum: 10c0/7c088c307fc72c033d324563f7b5c8f4f7afdbea51683d896d99b5463ff9f3801b559869a5c9c0078945e3f6d92745273eb19fc20f01b3b95d46f10f81bd9db9
-  languageName: node
-  linkType: hard
-
-"@vitest/utils@npm:4.0.0":
-  version: 4.0.0
-  resolution: "@vitest/utils@npm:4.0.0"
-  dependencies:
-    "@vitest/pretty-format": "npm:4.0.0"
-    tinyrainbow: "npm:^3.0.3"
-  checksum: 10c0/50b94ea391ce9418248ebbc23b6ce49921fe182f68fa816ddf64cbbcab4c9420d1f8a62ab905c28b48c0ac1f6ab0afcf3dfd3abfb788fcd0156e97ca79a1a7ec
   languageName: node
   linkType: hard
 
