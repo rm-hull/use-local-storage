@@ -1027,7 +1027,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:^6.9.1"
     "@testing-library/react": "npm:^16.3.0"
     "@types/jsdom": "npm:^27.0.0"
-    "@types/node": "npm:^24.9.1"
+    "@types/node": "npm:^24.9.2"
     "@types/react": "npm:^19.2.2"
     "@types/react-dom": "npm:^19.2.2"
     "@vitejs/plugin-react": "npm:^5.1.0"
@@ -1357,7 +1357,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^24.9.1":
+"@types/node@npm:*":
   version: 24.9.1
   resolution: "@types/node@npm:24.9.1"
   dependencies:
@@ -1370,6 +1370,15 @@ __metadata:
   version: 12.20.55
   resolution: "@types/node@npm:12.20.55"
   checksum: 10c0/3b190bb0410047d489c49bbaab592d2e6630de6a50f00ba3d7d513d59401d279972a8f5a598b5bb8ddc1702f8a2f4ec57a65d93852f9c329639738e7053637d1
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^24.9.2":
+  version: 24.9.2
+  resolution: "@types/node@npm:24.9.2"
+  dependencies:
+    undici-types: "npm:~7.16.0"
+  checksum: 10c0/7905d43f65cee72ef475fe76316e10bbf6ac5d08a7f0f6c38f2b6285d7ca3009e8fcafc8f8a1d2bf3f55889c9c278dbb203a9081fd0cf2d6d62161703924c6fa
   languageName: node
   linkType: hard
 
