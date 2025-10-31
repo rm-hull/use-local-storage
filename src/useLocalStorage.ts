@@ -112,9 +112,9 @@ export const useLocalStorage = <T extends Record<string, unknown> | undefined>(
       setStoredValue((prev) => {
         const currentValue = prev?.[key];
         if (isEqual(currentValue, newValue)) {
-          return prev ?? options?.initialValue;
+          return prev ?? {};
         }
-        return { ...(prev ?? options?.initialValue), [key]: newValue };
+        return { ...(prev ?? {}), [key]: newValue };
       });
     };
 
@@ -154,10 +154,10 @@ export const useLocalStorage = <T extends Record<string, unknown> | undefined>(
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, [key, serializer, setStoredValue, options?.initialValue]);
+  }, [key, serializer, setStoredValue]);
 
   return {
-    value: error ? undefined : storedValue?.[key] ?? options?.initialValue,
+    value: error ? undefined : (storedValue?.[key] as T) ?? options?.initialValue,
     setValue: useCallback(
       (value?: T) => setValue(key, serializer, value),
       [key, serializer]
