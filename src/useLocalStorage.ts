@@ -93,6 +93,7 @@ export const useLocalStorage = <T extends Record<string, unknown> | undefined>(
      * ```
      */
     serializer?: Serializer<T>;
+    initialValue?: T;
   }
 ) => {
   const [error, setError] = useState<Error | undefined>();
@@ -156,7 +157,7 @@ export const useLocalStorage = <T extends Record<string, unknown> | undefined>(
   }, [key, serializer, setStoredValue]);
 
   return {
-    value: storedValue?.[key] as T,
+    value: error ? undefined : (storedValue?.[key] as T) ?? options?.initialValue,
     setValue: useCallback(
       (value?: T) => setValue(key, serializer, value),
       [key, serializer]
