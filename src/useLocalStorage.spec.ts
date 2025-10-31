@@ -254,6 +254,76 @@ describe("useLocalStorage", () => {
         expect(result.current.value).toBe("external-value");
       });
     });
+
+    it("should listen to custom local-storage events", async () => {
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        localStorage.setItem("test-key", JSON.stringify("custom-event-value"));
+        window.dispatchEvent(new Event("local-storage"));
+      });
+
+      await waitFor(() => {
+        expect(result.current.value).toBe("custom-event-value");
+      });
+    });
+
+    it("should clean up event listeners on unmount", async () => {
+      const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
+
+      const { unmount } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      unmount();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "storage",
+        expect.any(Function)
+      );
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "local-storage",
+        expect.any(Function)
+      );
+
+      removeEventListenerSpy.mockRestore();
+    });
+
+    it("should update event listeners when key changes", async () => {
+      const { result, rerender } = renderHook(
+        ({ key }) => useLocalStorage<string>(key),
+        { initialProps: { key: "key1" } }
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue("value1");
+      });
+
+      await waitFor(() => {
+        expect(result.current.value).toBe("value1");
+      });
+
+      rerender({ key: "key2" });
+
+      await waitFor(() => {
+        expect(result.current.value).toBeUndefined();
+      });
+
+      act(() => {
+        localStorage.setItem("key2", JSON.stringify("value2"));
+        window.dispatchEvent(new Event("local-storage"));
+      });
+
+      await waitFor(() => {
+        expect(result.current.value).toBe("value2");
+      });
+    });
   });
 
   describe("Custom Synchronous Serializer", () => {
