@@ -125,15 +125,15 @@ describe("useLocalStorage", () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.value).toBeNull();
+      expect(result.current.value).toBeUndefined();
     });
   });
 
   describe("initialValue Option", () => {
     it("should use initialValue when localStorage is empty", async () => {
-      const initialValue = { testValue: "default-value" };
+      const initialValue = "default-value";
       const { result } = renderHook(() =>
-        useLocalStorage<TestBlob<string>>("test-key", { initialValue })
+        useLocalStorage<string>("test-key", { initialValue })
       );
 
       await waitFor(() => {
@@ -145,12 +145,12 @@ describe("useLocalStorage", () => {
     });
 
     it("should prioritize localStorage value over initialValue", async () => {
-      const localStorageValue = { testValue: "stored-value" };
+      const localStorageValue = "stored-value";
       localStorage.setItem("test-key", JSON.stringify(localStorageValue));
-      const initialValue = { testValue: "default-value" };
+      const initialValue = "default-value";
 
       const { result } = renderHook(() =>
-        useLocalStorage<TestBlob<string>>("test-key", { initialValue })
+        useLocalStorage<string>("test-key", { initialValue })
       );
 
       await waitFor(() => {
@@ -162,10 +162,10 @@ describe("useLocalStorage", () => {
 
     it("should be undefined when localStorage contains an invalid value", async () => {
       localStorage.setItem("test-key", "invalid-json");
-      const initialValue = { testValue: "default-value-on-error" };
+      const initialValue = "default-value-on-error";
 
       const { result } = renderHook(() =>
-        useLocalStorage<TestBlob<string>>("test-key", { initialValue })
+        useLocalStorage<string>("test-key", { initialValue })
       );
 
       await waitFor(() => {
@@ -602,7 +602,9 @@ describe("useLocalStorage", () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      await expect(() => result.current.setValue("value-to-serialize")).rejects.toThrow(LocalStorageError)
+      await expect(() =>
+        result.current.setValue("value-to-serialize")
+      ).rejects.toThrow(LocalStorageError);
       await waitFor(() => expect(localStorage.getItem("test-key")).toBeNull());
     });
 
