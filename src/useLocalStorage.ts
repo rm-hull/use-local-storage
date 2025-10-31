@@ -115,6 +115,9 @@ export const useLocalStorage = <T>(
         .then(updateValue)
         .catch((error) => {
           console.error(`Error reading localStorage key "${key}":`, error);
+        })
+        .finally(() => {
+          setIsLoading(false);
         });
     };
 
@@ -132,14 +135,11 @@ export const useLocalStorage = <T>(
       window.addEventListener("local-storage", handleStorageChange);
     }
 
-    const timeoutId = setTimeout(() => setIsLoading(false), 0);
-
     return () => {
       if (typeof window !== "undefined") {
         window.removeEventListener("storage", handleStorageChange);
         window.removeEventListener("local-storage", handleStorageChange);
       }
-      clearTimeout(timeoutId);
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
