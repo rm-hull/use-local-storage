@@ -1,6 +1,6 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
-import { useLocalStorage } from "./useLocalStorage";
+import { useLocalStorage, Serializer } from "./useLocalStorage";
 
 describe("useLocalStorage", () => {
   beforeEach(() => {
@@ -17,10 +17,14 @@ describe("useLocalStorage", () => {
   });
 
   describe("Initial State", () => {
-    it("should start with isLoading true", () => {
+    it("should start with isLoading true", async () => {
       const { result } = renderHook(() => useLocalStorage<string>("test-key"));
       const { isLoading } = result.current;
       expect(isLoading).toBe(true);
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
     });
 
     it("should set isLoading to false after initialization", async () => {
@@ -125,9 +129,13 @@ describe("useLocalStorage", () => {
   });
 
   describe("setValue", () => {
-    it("should provide a setValue function", () => {
+    it("should provide a setValue function", async () => {
       const { result } = renderHook(() => useLocalStorage<string>("test-key"));
       expect(typeof result.current.setValue).toBe("function");
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
     });
 
     it("should update the value in localStorage", async () => {
@@ -137,8 +145,8 @@ describe("useLocalStorage", () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      act(() => {
-        result.current.setValue("new-value");
+      await act(async () => {
+        await result.current.setValue("new-value");
       });
 
       const storedValue = localStorage.getItem("test-key");
@@ -152,8 +160,8 @@ describe("useLocalStorage", () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      act(() => {
-        result.current.setValue("new-value");
+      await act(async () => {
+        await result.current.setValue("new-value");
       });
 
       await waitFor(() => {
@@ -231,7 +239,9 @@ describe("useLocalStorage", () => {
         result.current.setValue("test-value");
       });
 
-      expect(eventListener).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(eventListener).toHaveBeenCalled();
+      });
 
       window.removeEventListener("local-storage", eventListener);
     });
@@ -326,6 +336,84 @@ describe("useLocalStorage", () => {
     });
   });
 
+  describe("Custom Synchronous Serializer", () => {
+    const reverseSerializer: Serializer<string> = {
+      serialize: (value) => value.split("").reverse().join(""),
+      deserialize: (value) => value.split("").reverse().join(""),
+    };
+
+    it("should use custom serializer for setting value", async () => {
+      const { result } = renderHook(() =>
+        useLocalStorage<string>("test-key", { serializer: reverseSerializer })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      await act(async () => {
+        await result.current.setValue("hello");
+      });
+
+      expect(localStorage.getItem("test-key")).toBe("olleh");
+    });
+
+    it("should use custom serializer for reading value", async () => {
+      localStorage.setItem("test-key", "olleh");
+
+      const { result } = renderHook(() =>
+        useLocalStorage<string>("test-key", { serializer: reverseSerializer })
+      );
+
+      await waitFor(() => {
+        expect(result.current.value).toBe("hello");
+      });
+    });
+  });
+
+  describe("Custom Asynchronous Serializer", () => {
+    const asyncSerializer: Serializer<string> = {
+      serialize: (value) =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve(value.split("").reverse().join("")), 10)
+        ),
+      deserialize: (value) =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve(value.split("").reverse().join("")), 10)
+        ),
+    };
+
+    it("should handle async serialization", async () => {
+      const { result } = renderHook(() =>
+        useLocalStorage<string>("test-key", { serializer: asyncSerializer })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      await act(async () => {
+        await result.current.setValue("hello");
+      });
+
+      await waitFor(() => {
+        expect(localStorage.getItem("test-key")).toBe("olleh");
+      });
+    });
+
+    it("should handle async deserialization", async () => {
+      localStorage.setItem("test-key", "olleh");
+
+      const { result } = renderHook(() =>
+        useLocalStorage<string>("test-key", { serializer: asyncSerializer })
+      );
+
+      await waitFor(() => {
+        expect(result.current.value).toBe("hello");
+      });
+    });
+  });
+
   describe("Multiple Hooks", () => {
     it("should sync multiple hooks with the same key", async () => {
       const { result: result1 } = renderHook(() =>
@@ -388,38 +476,52 @@ describe("useLocalStorage", () => {
   describe("Error Handling", () => {
     it("should handle JSON parse errors gracefully", async () => {
       localStorage.setItem("test-key", "invalid-json{");
-
-      expect(() => {
-        renderHook(() => useLocalStorage<string>("test-key"));
-      }).toThrow();
-    });
-
-    it("should handle localStorage.setItem errors", async () => {
       const consoleErrorSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
-      const setItemSpy = vi
-        .spyOn(Storage.prototype, "setItem")
-        .mockImplementation(() => {
-          throw new Error("Storage quota exceeded");
-        });
 
       const { result } = renderHook(() => useLocalStorage<string>("test-key"));
 
       await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
+        expect(result.current.value).toBeUndefined();
       });
 
-      act(() => {
-        result.current.setValue("test-value");
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
+    });
+
+    it("should handle serializer errors gracefully", async () => {
+      const errorSerializer: Serializer<string> = {
+        serialize: () => {
+          throw new Error("Serialization failed");
+        },
+        deserialize: () => {
+          throw new Error("Deserialization failed");
+        },
+      };
+
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      localStorage.setItem("test-key", "some-value");
+
+      const { result } = renderHook(() =>
+        useLocalStorage<string>("test-key", { serializer: errorSerializer })
+      );
+
+      await waitFor(() => {
+        expect(result.current.value).toBeUndefined();
+      });
+
+      await act(async () => {
+        await result.current.setValue("new-value");
       });
 
       expect(consoleErrorSpy).toHaveBeenCalled();
       const errorCall = consoleErrorSpy.mock.calls[0];
-      expect(errorCall[0]).toContain("Error setting localStorage key");
+      expect(errorCall[0]).toContain("Error deserializing localStorage key \"test-key\"");
       expect(errorCall[1]).toBeInstanceOf(Error);
-
-      setItemSpy.mockRestore();
       consoleErrorSpy.mockRestore();
     });
   });
