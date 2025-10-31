@@ -1,6 +1,7 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
 import { useLocalStorage, Serializer } from "./useLocalStorage";
+import { LocalStorageError } from "./error";
 
 describe("useLocalStorage", () => {
   beforeEach(() => {
@@ -476,18 +477,16 @@ describe("useLocalStorage", () => {
   describe("Error Handling", () => {
     it("should handle JSON parse errors gracefully", async () => {
       localStorage.setItem("test-key", "invalid-json{");
-      const consoleErrorSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
 
       const { result } = renderHook(() => useLocalStorage<string>("test-key"));
 
       await waitFor(() => {
         expect(result.current.value).toBeUndefined();
+        expect(result.current.error).toBeInstanceOf(LocalStorageError);
+        expect(result.current.error?.message).toContain(
+          'Error deserializing localStorage key "test-key"'
+        );
       });
-
-      expect(consoleErrorSpy).toHaveBeenCalled();
-      consoleErrorSpy.mockRestore();
     });
 
     it("should handle serializer errors gracefully", async () => {
@@ -500,10 +499,6 @@ describe("useLocalStorage", () => {
         },
       };
 
-      const consoleErrorSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
       localStorage.setItem("test-key", "some-value");
 
       const { result } = renderHook(() =>
@@ -512,17 +507,79 @@ describe("useLocalStorage", () => {
 
       await waitFor(() => {
         expect(result.current.value).toBeUndefined();
+        expect(result.current.error).toBeInstanceOf(LocalStorageError);
+        expect(result.current.error?.message).toContain(
+          'Error deserializing localStorage key "test-key"'
+        );
+      });
+    });
+
+    it("should clear error when a valid value is set", async () => {
+      localStorage.setItem("test-key", "invalid-json{");
+
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.error).toBeInstanceOf(LocalStorageError);
       });
 
-      await act(async () => {
-        await result.current.setValue("new-value");
+      act(() => {
+        localStorage.setItem("test-key", JSON.stringify("valid-value"));
+        window.dispatchEvent(new Event("local-storage"));
       });
 
-      expect(consoleErrorSpy).toHaveBeenCalled();
-      const errorCall = consoleErrorSpy.mock.calls[0];
-      expect(errorCall[0]).toContain("Error deserializing localStorage key \"test-key\"");
-      expect(errorCall[1]).toBeInstanceOf(Error);
-      consoleErrorSpy.mockRestore();
+      await waitFor(() => {
+        expect(result.current.value).toBe("valid-value");
+        expect(result.current.error).toBeUndefined();
+      });
+    });
+
+    it("should throw LocalStorageError when serializer fails during setValue", async () => {
+      const errorSerializer: Serializer<string> = {
+        serialize: () => {
+          throw new Error("Serialization failed during set");
+        },
+        deserialize: (value) => value, // Deserialization won't be called in this test path
+      };
+
+      const { result } = renderHook(() =>
+        useLocalStorage<string>("test-key", { serializer: errorSerializer })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      await expect(() => result.current.setValue("value-to-serialize")).rejects.toThrow(LocalStorageError)
+      await waitFor(() => expect(localStorage.getItem("test-key")).toBeNull());
+    });
+
+    it("should throw LocalStorageError when serializer fails during deserialization", async () => {
+      const errorSerializer: Serializer<string> = {
+        serialize: (value) => value,
+        deserialize: () => {
+          throw new Error("Deserialization failed during read");
+        },
+      };
+
+      localStorage.setItem("test-key", "some-value");
+
+      const { result } = renderHook(() =>
+        useLocalStorage<string>("test-key", { serializer: errorSerializer })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toBeUndefined();
+      expect(result.current.error).toBeInstanceOf(LocalStorageError);
+      expect(result.current.error?.message).toContain(
+        'Error deserializing localStorage key "test-key"'
+      );
+      expect(result.current.error?.cause?.message).toBe(
+        "Deserialization failed during read"
+      );
     });
   });
 

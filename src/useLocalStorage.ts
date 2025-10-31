@@ -1,5 +1,6 @@
 import { atom, useAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { LocalStorageError } from "./error";
 
 export interface Serializer<T> {
   // eslint-disable-next-line no-unused-vars
@@ -40,8 +41,10 @@ async function readValue<T>(
   try {
     return await Promise.resolve(serializer.deserialize(item));
   } catch (error) {
-    console.error(`Error deserializing localStorage key "${key}":`, error);
-    return undefined;
+    throw new LocalStorageError(
+      `Error deserializing localStorage key "${key}"`,
+      error as Error
+    );
   }
 }
 
@@ -62,7 +65,10 @@ async function setValue<T>(key: string, serializer: Serializer<T>, value?: T) {
 
     window.dispatchEvent(new Event("local-storage"));
   } catch (error) {
-    console.error(`Error setting localStorage key "${key}":`, error);
+    throw new LocalStorageError(
+      `Error setting localStorage key "${key}"`,
+      error as Error
+    );
   }
 }
 
@@ -89,6 +95,7 @@ export const useLocalStorage = <T>(
     serializer?: Serializer<T>;
   }
 ) => {
+  const [error, setError] = useState<Error | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const [storedValue, setStoredValue] = useAtom(localStorageAtom);
   const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -112,13 +119,15 @@ export const useLocalStorage = <T>(
 
     const readValueFromStorage = () => {
       readValue<T>(key, serializer)
-        .then(updateValue)
-        .catch((error) => {
-          console.error(`Error reading localStorage key "${key}":`, error);
+        .then((newValue) => {
+          setError(undefined)
+          updateValue(newValue);
         })
-        .finally(() => {
-          setIsLoading(false);
-        });
+        .catch((error) => {
+          setError(error);
+          updateValue(undefined);
+        })
+        .finally(() => void setIsLoading(false));
     };
 
     readValueFromStorage();
@@ -149,11 +158,10 @@ export const useLocalStorage = <T>(
   return {
     value: storedValue?.[key] as T,
     setValue: useCallback(
-      (value?: T) => {
-        return setValue(key, serializer, value);
-      },
+      (value?: T) => setValue(key, serializer, value),
       [key, serializer]
     ),
     isLoading,
+    error,
   };
 };

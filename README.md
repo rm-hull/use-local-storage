@@ -32,9 +32,10 @@ yarn add @rm-hull/use-local-storage
 import { useLocalStorage } from "@rm-hull/use-local-storage";
 
 function Counter() {
-  const { value = 0, setValue, isLoading } = useLocalStorage<number>("counter");
+  const { value = 0, setValue, isLoading, error } = useLocalStorage<number>("counter");
 
   if (isLoading) return <div>Loading...</div>;
+  if (!!error) return <div>Error: {error.message}</div>;
 
   return (
     <div>
@@ -112,17 +113,6 @@ function ShoppingCart() {
 }
 ```
 
-## Features
-
-- **Auto-sync across tabs** - Changes in one tab are instantly reflected in others
-- **Type-safe** - Full TypeScript support with generics
-- **SSR-compatible** - Handles server-side rendering gracefully
-- **Efficient** - Uses Jotai for optimized re-renders
-- **Easy cleanup** - Pass `undefined` to remove items
-- **Lightweight** - Minimal bundle size
-
-## Advanced Usage
-
 ### Custom Serializer
 
 You can provide a custom serializer to transform the data before it's stored and after it's retrieved. This is useful for encrypting data or transforming it in other ways.
@@ -137,7 +127,16 @@ const reverseSerializer = {
 const { value } = useLocalStorage('my-key', { serializer: reverseSerializer });
 ```
 
-A more practical use case would be to use a library like `crypto-js` to encrypt the data before storing it.
+A more practical use case would be to use a library like [crypto-js](https://github.com/brix/crypto-js) to encrypt the data before storing it.
+
+## Features
+
+- **Auto-sync across tabs** - Changes in one tab are instantly reflected in others
+- **Type-safe** - Full TypeScript support with generics
+- **SSR-compatible** - Handles server-side rendering gracefully
+- **Efficient** - Uses Jotai for optimized re-renders
+- **Easy cleanup** - Pass `undefined` to remove items
+- **Lightweight** - Minimal bundle size
 
 ## Contributer Guidelines
 
