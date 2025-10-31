@@ -54,7 +54,9 @@ async function setValue<T>(key: string, serializer: Serializer<T>, value?: T) {
     if (value === undefined) {
       window.localStorage.removeItem(key);
     } else {
-      const serializedValue = await Promise.resolve(serializer.serialize(value));
+      const serializedValue = await Promise.resolve(
+        serializer.serialize(value)
+      );
       window.localStorage.setItem(key, serializedValue);
     }
 
@@ -108,26 +110,21 @@ export const useLocalStorage = <T>(
       });
     };
 
-    readValue<T>(key, serializer)
-      .then(updateValue)
-      .catch((error) => {
-        console.error(`Error reading localStorage key "${key}":`, error);
-        updateValue(undefined);
-      });
+    const readValueFromStorage = () => {
+      readValue<T>(key, serializer)
+        .then(updateValue)
+        .catch((error) => {
+          console.error(`Error reading localStorage key "${key}":`, error);
+        });
+    };
+
+    readValueFromStorage();
 
     const handleStorageChange = (): void => {
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
-
-      debounceTimeoutRef.current = setTimeout(() => {
-        readValue<T>(key, serializer)
-          .then(updateValue)
-          .catch((error) => {
-            console.error(`Error reading localStorage key "${key}":`, error);
-            updateValue(undefined);
-          });
-      }, 50);
+      debounceTimeoutRef.current = setTimeout(readValueFromStorage, 50);
     };
 
     if (typeof window !== "undefined") {
