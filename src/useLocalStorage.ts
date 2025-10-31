@@ -93,6 +93,7 @@ export const useLocalStorage = <T extends Record<string, unknown> | undefined>(
      * ```
      */
     serializer?: Serializer<T>;
+    initialValue?: T;
   }
 ) => {
   const [error, setError] = useState<Error | undefined>();
@@ -111,9 +112,9 @@ export const useLocalStorage = <T extends Record<string, unknown> | undefined>(
       setStoredValue((prev) => {
         const currentValue = prev?.[key];
         if (isEqual(currentValue, newValue)) {
-          return prev ?? {};
+          return prev ?? options?.initialValue;
         }
-        return { ...(prev ?? {}), [key]: newValue };
+        return { ...(prev ?? options?.initialValue), [key]: newValue };
       });
     };
 
@@ -153,10 +154,10 @@ export const useLocalStorage = <T extends Record<string, unknown> | undefined>(
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, [key, serializer, setStoredValue]);
+  }, [key, serializer, setStoredValue, options?.initialValue]);
 
   return {
-    value: storedValue?.[key] as T,
+    value: error ? undefined : storedValue?.[key] ?? options?.initialValue,
     setValue: useCallback(
       (value?: T) => setValue(key, serializer, value),
       [key, serializer]

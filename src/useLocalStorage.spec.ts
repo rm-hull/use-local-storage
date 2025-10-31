@@ -147,7 +147,60 @@ describe("useLocalStorage", () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.value).toBeNull();
+      expect(result.current.error).toBeUndefined();
+      expect(result.current.value).toBeUndefined();
+    });
+  });
+
+  describe("initialValue Option", () => {
+    it("should use initialValue when localStorage is empty", async () => {
+      const initialValue = { testValue: "default-value" };
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key", { initialValue })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toStrictEqual(initialValue);
+      expect(localStorage.getItem("test-key")).toBeNull();
+    });
+
+    it("should prioritize localStorage value over initialValue", async () => {
+      const localStorageValue = { testValue: "stored-value" };
+      localStorage.setItem("test-key", JSON.stringify(localStorageValue));
+      const initialValue = { testValue: "default-value" };
+
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key", { initialValue })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toStrictEqual(localStorageValue);
+    });
+
+    it("should be undefined when localStorage contains an invalid value", async () => {
+      localStorage.setItem("test-key", "invalid-json");
+      const initialValue = { testValue: "default-value-on-error" };
+
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key", { initialValue })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      await waitFor(() => {
+        expect(result.current.error).toBeInstanceOf(LocalStorageError);
+      });
+
+      expect(result.current.value).toBeUndefined();
+      expect(localStorage.getItem("test-key")).toBe("invalid-json");
     });
   });
 
@@ -805,13 +858,15 @@ describe("useLocalStorage", () => {
 
       await waitFor(
         () => {
-          expect(result.current.value).toStrictEqual({ testValue: "test-value" });
+          expect(result.current.value).toStrictEqual({
+            testValue: "test-value",
+          });
         },
         { timeout: 2000 }
       );
 
       expect(localStorage.getItem(specialKey)).toBe(
-        JSON.stringify({testValue:"test-value"})
+        JSON.stringify({ testValue: "test-value" })
       );
     });
 
