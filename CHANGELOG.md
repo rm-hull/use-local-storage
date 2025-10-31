@@ -1,5 +1,11 @@
 # @rm-hull/use-local-storage
 
+## 0.3.0
+
+### Minor Changes
+
+- bc02ee8: Add initialValue option
+
 ## 0.2.0
 
 ### Minor Changes
