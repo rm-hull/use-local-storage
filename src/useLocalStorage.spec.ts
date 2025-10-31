@@ -52,9 +52,84 @@ describe("useLocalStorage", () => {
 
       expect(result.current.value).toBe("initial-value");
     });
+
+    it("should handle complex objects", async () => {
+      const complexObject = {
+        name: "John",
+        age: 30,
+        hobbies: ["reading", "coding"],
+      };
+      localStorage.setItem("test-key", JSON.stringify(complexObject));
+
+      const { result } = renderHook(() =>
+        useLocalStorage<typeof complexObject>("test-key")
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toEqual(complexObject);
+    });
+
+    it("should handle arrays", async () => {
+      const array = [1, 2, 3, 4, 5];
+      localStorage.setItem("test-key", JSON.stringify(array));
+
+      const { result } = renderHook(() =>
+        useLocalStorage<number[]>("test-key")
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toEqual(array);
+    });
+
+    it("should handle boolean values", async () => {
+      localStorage.setItem("test-key", JSON.stringify(true));
+
+      const { result } = renderHook(() => useLocalStorage<boolean>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toBe(true);
+    });
+
+    it("should handle number values", async () => {
+      localStorage.setItem("test-key", JSON.stringify(42));
+
+      const { result } = renderHook(() => useLocalStorage<number>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toBe(42);
+    });
+
+    it("should handle null values", async () => {
+      localStorage.setItem("test-key", JSON.stringify(null));
+
+      const { result } = renderHook(() => useLocalStorage<null>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.value).toBeNull();
+    });
   });
 
   describe("setValue", () => {
+    it("should provide a setValue function", () => {
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      expect(typeof result.current.setValue).toBe("function");
+    });
+
     it("should update the value in localStorage", async () => {
       const { result } = renderHook(() => useLocalStorage<string>("test-key"));
 
@@ -84,6 +159,81 @@ describe("useLocalStorage", () => {
       await waitFor(() => {
         expect(result.current.value).toBe("new-value");
       });
+    });
+
+    it("should remove value from localStorage when setValue is called with undefined", async () => {
+      localStorage.setItem("test-key", JSON.stringify("initial-value"));
+
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setValue(undefined);
+      });
+
+      expect(localStorage.getItem("test-key")).toBeNull();
+    });
+
+    it("should update the hook value to undefined when setValue is called with undefined", async () => {
+      localStorage.setItem("test-key", JSON.stringify("initial-value"));
+
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.value).toBe("initial-value");
+      });
+
+      act(() => {
+        result.current.setValue(undefined);
+      });
+
+      await waitFor(() => {
+        expect(result.current.value).toBeUndefined();
+      });
+    });
+
+    it("should handle setting complex objects", async () => {
+      const { result } = renderHook(() =>
+        useLocalStorage<{ name: string; age: number }>("test-key")
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      const newValue = { name: "Jane", age: 25 };
+
+      act(() => {
+        result.current.setValue(newValue);
+      });
+
+      await waitFor(() => {
+        expect(result.current.value).toEqual(newValue);
+      });
+
+      expect(localStorage.getItem("test-key")).toBe(JSON.stringify(newValue));
+    });
+
+    it("should dispatch custom local-storage event", async () => {
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      const eventListener = vi.fn();
+      window.addEventListener("local-storage", eventListener);
+
+      act(() => {
+        result.current.setValue("test-value");
+      });
+
+      expect(eventListener).toHaveBeenCalled();
+
+      window.removeEventListener("local-storage", eventListener);
     });
   });
 
