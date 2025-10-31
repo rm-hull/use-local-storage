@@ -127,7 +127,7 @@ const reverseSerializer = {
 const { value } = useLocalStorage('my-key', { serializer: reverseSerializer });
 ```
 
-A more practical use case would be to use a library like `crypto-js` to encrypt the data before storing it.
+A more practical use case would be to use a library like [crypto-js](https://github.com/brix/crypto-js) to encrypt the data before storing it.
 
 ## Features
 
