@@ -19,7 +19,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsup src/index.ts --format esm,cjs --dts",
-    "test": "vitest",
+    "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src --ext .ts,.tsx",
     "changeset": "changeset",

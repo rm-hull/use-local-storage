@@ -1,5 +1,22 @@
 import { atom, useAtom } from "jotai";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+export interface Serializer<T> {
+  // eslint-disable-next-line no-unused-vars
+  serialize: (_value: T) => string | Promise<string>;
+  // eslint-disable-next-line no-unused-vars
+  deserialize: (_value: string) => T | Promise<T>;
+}
+
+export class JsonSerializer<T> implements Serializer<T> {
+  public serialize(value: T): string {
+    return JSON.stringify(value);
+  }
+
+  public deserialize(value: string): T {
+    return JSON.parse(value) as T;
+  }
+}
 
 const localStorageAtom = atom<Record<string, unknown> | undefined>(undefined);
 
@@ -7,18 +24,28 @@ function isEqual(a: unknown, b: unknown): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-function readValue<T>(key: string): T | undefined {
+async function readValue<T>(
+  key: string,
+  serializer: Serializer<T>
+): Promise<T | undefined> {
   if (typeof window === "undefined") {
     return undefined;
   }
 
   const item = window.localStorage.getItem(key);
-  return item === null || item === undefined
-    ? undefined
-    : (JSON.parse(item) as T);
+  if (item === null || item === undefined) {
+    return undefined;
+  }
+
+  try {
+    return await Promise.resolve(serializer.deserialize(item));
+  } catch (error) {
+    console.error(`Error deserializing localStorage key "${key}":`, error);
+    return undefined;
+  }
 }
 
-function setValue<T>(key: string, value?: T) {
+async function setValue<T>(key: string, serializer: Serializer<T>, value?: T) {
   if (typeof window === "undefined") {
     return;
   }
@@ -27,7 +54,8 @@ function setValue<T>(key: string, value?: T) {
     if (value === undefined) {
       window.localStorage.removeItem(key);
     } else {
-      window.localStorage.setItem(key, JSON.stringify(value));
+      const serializedValue = await Promise.resolve(serializer.serialize(value));
+      window.localStorage.setItem(key, serializedValue);
     }
 
     window.dispatchEvent(new Event("local-storage"));
@@ -36,11 +64,37 @@ function setValue<T>(key: string, value?: T) {
   }
 }
 
-export const useLocalStorage = <T>(key: string) => {
+export const useLocalStorage = <T>(
+  key: string,
+  options?: {
+    /**
+     * A serializer to use when reading/writing to localStorage.
+     *
+     * The main use case for this is to encrypt the data before writing it to
+     * localStorage, and to decrypt it when reading it.
+     *
+     * @example
+     * A silly example that reverses the string before writing it to localStorage:
+     * ```ts
+     * const reverseSerializer = {
+     *   serialize: (value: string) => value.split('').reverse().join(''),
+     *   deserialize: (value: string) => value.split('').reverse().join(''),
+     * };
+     *
+     * const { value } = useLocalStorage('my-key', { serializer: reverseSerializer });
+     * ```
+     */
+    serializer?: Serializer<T>;
+  }
+) => {
   const [isLoading, setIsLoading] = useState(true);
   const [storedValue, setStoredValue] = useAtom(localStorageAtom);
   const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
+  );
+  const serializer = useMemo(
+    () => options?.serializer ?? new JsonSerializer<T>(),
+    [options?.serializer]
   );
 
   useEffect(() => {
@@ -54,7 +108,12 @@ export const useLocalStorage = <T>(key: string) => {
       });
     };
 
-    updateValue(readValue<T>(key));
+    readValue<T>(key, serializer)
+      .then(updateValue)
+      .catch((error) => {
+        console.error(`Error reading localStorage key "${key}":`, error);
+        updateValue(undefined);
+      });
 
     const handleStorageChange = (): void => {
       if (debounceTimeoutRef.current) {
@@ -62,7 +121,12 @@ export const useLocalStorage = <T>(key: string) => {
       }
 
       debounceTimeoutRef.current = setTimeout(() => {
-        updateValue(readValue<T>(key));
+        readValue<T>(key, serializer)
+          .then(updateValue)
+          .catch((error) => {
+            console.error(`Error reading localStorage key "${key}":`, error);
+            updateValue(undefined);
+          });
       }, 50);
     };
 
@@ -83,15 +147,15 @@ export const useLocalStorage = <T>(key: string) => {
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, [key, setStoredValue]);
+  }, [key, serializer, setStoredValue]);
 
   return {
     value: storedValue?.[key] as T,
     setValue: useCallback(
       (value?: T) => {
-        setValue(key, value);
+        return setValue(key, serializer, value);
       },
-      [key]
+      [key, serializer]
     ),
     isLoading,
   };

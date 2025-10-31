@@ -121,6 +121,24 @@ function ShoppingCart() {
 - **Easy cleanup** - Pass `undefined` to remove items
 - **Lightweight** - Minimal bundle size
 
+## Advanced Usage
+
+### Custom Serializer
+
+You can provide a custom serializer to transform the data before it's stored and after it's retrieved. This is useful for encrypting data or transforming it in other ways.
+
+A silly example that reverses the string before writing it to localStorage:
+```ts
+const reverseSerializer = {
+  serialize: (value: string) => value.split('').reverse().join(''),
+  deserialize: (value: string) => value.split('').reverse().join(''),
+};
+
+const { value } = useLocalStorage('my-key', { serializer: reverseSerializer });
+```
+
+A more practical use case would be to use a library like `crypto-js` to encrypt the data before storing it.
+
 ## Contributer Guidelines
 
 ### Releasing a New Version
