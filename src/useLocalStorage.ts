@@ -72,7 +72,7 @@ async function setValue<T>(key: string, serializer: Serializer<T>, value?: T) {
   }
 }
 
-export const useLocalStorage = <T extends Record<string, unknown> | undefined>(
+export const useLocalStorage = <T>(
   key: string,
   options?: {
     /**
@@ -121,7 +121,7 @@ export const useLocalStorage = <T extends Record<string, unknown> | undefined>(
     const readValueFromStorage = () => {
       readValue<T>(key, serializer)
         .then((newValue) => {
-          setError(undefined);
+          setError(undefined)
           updateValue(newValue);
         })
         .catch((error) => {
