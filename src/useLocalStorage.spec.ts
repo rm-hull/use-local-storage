@@ -334,6 +334,65 @@ describe("useLocalStorage", () => {
     });
   });
 
+  describe("Multiple Hooks", () => {
+    it("should sync multiple hooks with the same key", async () => {
+      const { result: result1 } = renderHook(() =>
+        useLocalStorage<string>("shared-key")
+      );
+      const { result: result2 } = renderHook(() =>
+        useLocalStorage<string>("shared-key")
+      );
+
+      await waitFor(() => {
+        expect(result1.current.isLoading).toBe(false);
+        expect(result2.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result1.current.setValue("shared-value");
+      });
+
+      await waitFor(() => {
+        expect(result1.current.value).toBe("shared-value");
+        expect(result2.current.value).toBe("shared-value");
+      });
+    });
+
+    it("should not interfere with hooks using different keys", async () => {
+      const { result: result1 } = renderHook(() =>
+        useLocalStorage<string>("key1")
+      );
+      const { result: result2 } = renderHook(() =>
+        useLocalStorage<string>("key2")
+      );
+
+      await waitFor(() => {
+        expect(result1.current.isLoading).toBe(false);
+        expect(result2.current.isLoading).toBe(false);
+      });
+
+      act(() => {
+        result1.current.setValue("value1");
+      });
+
+      await waitFor(() => {
+        expect(result1.current.value).toBe("value1");
+      });
+
+      expect(result2.current.value).toBeUndefined();
+
+      act(() => {
+        result2.current.setValue("value2");
+      });
+
+      await waitFor(() => {
+        expect(result2.current.value).toBe("value2");
+      });
+
+      expect(result1.current.value).toBe("value1");
+    });
+  });
+
   describe("Error Handling", () => {
     it("should handle JSON parse errors gracefully", async () => {
       localStorage.setItem("test-key", "invalid-json{");
