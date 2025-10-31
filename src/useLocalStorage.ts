@@ -3,9 +3,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export interface Serializer<T> {
   // eslint-disable-next-line no-unused-vars
-  serialize: (_value: T) => string | Promise<string>;
+  serialize: (value: T) => string | Promise<string>;
   // eslint-disable-next-line no-unused-vars
-  deserialize: (_value: string) => T | Promise<T>;
+  deserialize: (value: string) => T | Promise<T>;
 }
 
 export class JsonSerializer<T> implements Serializer<T> {
