@@ -119,7 +119,10 @@ export const useLocalStorage = <T>(
 
     const readValueFromStorage = () => {
       readValue<T>(key, serializer)
-        .then(updateValue)
+        .then((newValue) => {
+          setError(undefined)
+          updateValue(newValue);
+        })
         .catch((error) => {
           setError(error);
           updateValue(undefined);

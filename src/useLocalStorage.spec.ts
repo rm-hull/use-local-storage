@@ -483,16 +483,18 @@ describe("useLocalStorage", () => {
       await waitFor(() => {
         expect(result.current.value).toBeUndefined();
         expect(result.current.error).toBeInstanceOf(LocalStorageError);
-        expect(result.current.error?.message).toContain("Error deserializing localStorage key \"test-key\"");
+        expect(result.current.error?.message).toContain(
+          'Error deserializing localStorage key "test-key"'
+        );
       });
     });
 
     it("should handle serializer errors gracefully", async () => {
       const errorSerializer: Serializer<string> = {
-        serialize: (value) => {
+        serialize: () => {
           throw new Error("Serialization failed");
         },
-        deserialize: (value) => {
+        deserialize: () => {
           throw new Error("Deserialization failed");
         },
       };
@@ -506,7 +508,58 @@ describe("useLocalStorage", () => {
       await waitFor(() => {
         expect(result.current.value).toBeUndefined();
         expect(result.current.error).toBeInstanceOf(LocalStorageError);
-        expect(result.current.error?.message).toContain("Error deserializing localStorage key \"test-key\"");
+        expect(result.current.error?.message).toContain(
+          'Error deserializing localStorage key "test-key"'
+        );
+      });
+    });
+
+    it("should clear error when a valid value is set", async () => {
+      localStorage.setItem("test-key", "invalid-json{");
+
+      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+
+      await waitFor(() => {
+        expect(result.current.error).toBeInstanceOf(LocalStorageError);
+      });
+
+      act(() => {
+        localStorage.setItem("test-key", JSON.stringify("valid-value"));
+        window.dispatchEvent(new Event("local-storage"));
+      });
+
+      await waitFor(() => {
+        expect(result.current.value).toBe("valid-value");
+        expect(result.current.error).toBeUndefined();
+      });
+    });
+
+    it("should throw LocalStorageError when serializer fails during setValue", async () => {
+      const errorSerializer: Serializer<string> = {
+        serialize: () => {
+          throw new Error("Serialization failed during set");
+        },
+        deserialize: (value) => value, // Deserialization won't be called in this test path
+      };
+
+      const { result } = renderHook(() =>
+        useLocalStorage<string>("test-key", { serializer: errorSerializer })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      await act(async () => {
+        await result.current.setValue("value-to-serialize");
+      });
+
+      await waitFor(() => {
+        expect(result.current.error).toBeInstanceOf(LocalStorageError);
+        expect(result.current.error?.message).toContain(
+          'Error setting localStorage key "test-key"'
+        );
+        expect(localStorage.getItem("test-key")).toBeNull();
       });
     });
   });
