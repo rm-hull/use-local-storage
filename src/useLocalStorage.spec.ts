@@ -3,6 +3,14 @@ import { vi } from "vitest";
 import { useLocalStorage, Serializer } from "./useLocalStorage";
 import { LocalStorageError } from "./error";
 
+interface TestBlob<V> extends Record<string, unknown> {
+  testValue: V;
+}
+
+async function delay(ms: number) {
+  return new Promise((res) => setTimeout(res, ms));
+}
+
 describe("useLocalStorage", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -19,7 +27,9 @@ describe("useLocalStorage", () => {
 
   describe("Initial State", () => {
     it("should start with isLoading true", async () => {
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
       const { isLoading } = result.current;
       expect(isLoading).toBe(true);
 
@@ -29,7 +39,9 @@ describe("useLocalStorage", () => {
     });
 
     it("should set isLoading to false after initialization", async () => {
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -37,7 +49,9 @@ describe("useLocalStorage", () => {
     });
 
     it("should return undefined value when key does not exist", async () => {
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -49,7 +63,9 @@ describe("useLocalStorage", () => {
     it("should read initial value from localStorage", async () => {
       localStorage.setItem("test-key", JSON.stringify("initial-value"));
 
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -82,7 +98,7 @@ describe("useLocalStorage", () => {
       localStorage.setItem("test-key", JSON.stringify(array));
 
       const { result } = renderHook(() =>
-        useLocalStorage<number[]>("test-key")
+        useLocalStorage<TestBlob<number[]>>("test-key")
       );
 
       await waitFor(() => {
@@ -95,7 +111,9 @@ describe("useLocalStorage", () => {
     it("should handle boolean values", async () => {
       localStorage.setItem("test-key", JSON.stringify(true));
 
-      const { result } = renderHook(() => useLocalStorage<boolean>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<TestBlob<boolean>>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -107,7 +125,9 @@ describe("useLocalStorage", () => {
     it("should handle number values", async () => {
       localStorage.setItem("test-key", JSON.stringify(42));
 
-      const { result } = renderHook(() => useLocalStorage<number>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<number>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -119,7 +139,9 @@ describe("useLocalStorage", () => {
     it("should handle null values", async () => {
       localStorage.setItem("test-key", JSON.stringify(null));
 
-      const { result } = renderHook(() => useLocalStorage<null>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<null>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -131,7 +153,9 @@ describe("useLocalStorage", () => {
 
   describe("setValue", () => {
     it("should provide a setValue function", async () => {
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
       expect(typeof result.current.setValue).toBe("function");
 
       await waitFor(() => {
@@ -140,40 +164,46 @@ describe("useLocalStorage", () => {
     });
 
     it("should update the value in localStorage", async () => {
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
       await act(async () => {
-        await result.current.setValue("new-value");
+        await result.current.setValue({ testValue: "new-value" });
       });
 
       const storedValue = localStorage.getItem("test-key");
-      expect(storedValue).toBe(JSON.stringify("new-value"));
+      expect(storedValue).toBe(JSON.stringify({ testValue: "new-value" }));
     });
 
     it("should update the hook value when setValue is called", async () => {
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
       await act(async () => {
-        await result.current.setValue("new-value");
+        await result.current.setValue({ testValue: "new-value" });
       });
 
       await waitFor(() => {
-        expect(result.current.value).toBe("new-value");
+        expect(result.current.value).toStrictEqual({ testValue: "new-value" });
       });
     });
 
     it("should remove value from localStorage when setValue is called with undefined", async () => {
       localStorage.setItem("test-key", JSON.stringify("initial-value"));
 
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -189,7 +219,9 @@ describe("useLocalStorage", () => {
     it("should update the hook value to undefined when setValue is called with undefined", async () => {
       localStorage.setItem("test-key", JSON.stringify("initial-value"));
 
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.value).toBe("initial-value");
@@ -227,7 +259,9 @@ describe("useLocalStorage", () => {
     });
 
     it("should dispatch custom local-storage event", async () => {
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -237,7 +271,7 @@ describe("useLocalStorage", () => {
       window.addEventListener("local-storage", eventListener);
 
       act(() => {
-        result.current.setValue("test-value");
+        result.current.setValue({ testValue: "test-value" });
       });
 
       await waitFor(() => {
@@ -250,7 +284,9 @@ describe("useLocalStorage", () => {
 
   describe("Event Listeners", () => {
     it("should listen to storage events", async () => {
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -267,7 +303,9 @@ describe("useLocalStorage", () => {
     });
 
     it("should listen to custom local-storage events", async () => {
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -286,7 +324,9 @@ describe("useLocalStorage", () => {
     it("should clean up event listeners on unmount", async () => {
       const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
 
-      const { unmount } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { unmount } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       unmount();
 
@@ -304,7 +344,7 @@ describe("useLocalStorage", () => {
 
     it("should update event listeners when key changes", async () => {
       const { result, rerender } = renderHook(
-        ({ key }) => useLocalStorage<string>(key),
+        ({ key }) => useLocalStorage<TestBlob<string>>(key),
         { initialProps: { key: "key1" } }
       );
 
@@ -313,11 +353,11 @@ describe("useLocalStorage", () => {
       });
 
       act(() => {
-        result.current.setValue("value1");
+        result.current.setValue({ testValue: "value1" });
       });
 
       await waitFor(() => {
-        expect(result.current.value).toBe("value1");
+        expect(result.current.value).toStrictEqual({ testValue: "value1" });
       });
 
       rerender({ key: "key2" });
@@ -327,25 +367,27 @@ describe("useLocalStorage", () => {
       });
 
       act(() => {
-        localStorage.setItem("key2", JSON.stringify("value2"));
+        localStorage.setItem("key2", JSON.stringify({ testValue: "value2" }));
         window.dispatchEvent(new Event("local-storage"));
       });
 
       await waitFor(() => {
-        expect(result.current.value).toBe("value2");
+        expect(result.current.value).toStrictEqual({ testValue: "value2" });
       });
     });
   });
 
   describe("Custom Synchronous Serializer", () => {
-    const reverseSerializer: Serializer<string> = {
-      serialize: (value) => value.split("").reverse().join(""),
-      deserialize: (value) => value.split("").reverse().join(""),
+    const reverseSerializer: Serializer<TestBlob<string>> = {
+      serialize: (value) => JSON.stringify(value).split("").reverse().join(""),
+      deserialize: (value) => JSON.parse(value.split("").reverse().join("")),
     };
 
     it("should use custom serializer for setting value", async () => {
       const { result } = renderHook(() =>
-        useLocalStorage<string>("test-key", { serializer: reverseSerializer })
+        useLocalStorage<TestBlob<string>>("test-key", {
+          serializer: reverseSerializer,
+        })
       );
 
       await waitFor(() => {
@@ -353,40 +395,44 @@ describe("useLocalStorage", () => {
       });
 
       await act(async () => {
-        await result.current.setValue("hello");
+        await result.current.setValue({ testValue: "hello" });
       });
 
-      expect(localStorage.getItem("test-key")).toBe("olleh");
+      expect(localStorage.getItem("test-key")).toBe('}"olleh":"eulaVtset"{');
     });
 
     it("should use custom serializer for reading value", async () => {
-      localStorage.setItem("test-key", "olleh");
+      localStorage.setItem("test-key", '}"olleh":"eulaVtset"{');
 
       const { result } = renderHook(() =>
-        useLocalStorage<string>("test-key", { serializer: reverseSerializer })
+        useLocalStorage<TestBlob<string>>("test-key", {
+          serializer: reverseSerializer,
+        })
       );
 
       await waitFor(() => {
-        expect(result.current.value).toBe("hello");
+        expect(result.current.value).toStrictEqual({ testValue: "hello" });
       });
     });
   });
 
   describe("Custom Asynchronous Serializer", () => {
-    const asyncSerializer: Serializer<string> = {
-      serialize: (value) =>
-        new Promise((resolve) =>
-          setTimeout(() => resolve(value.split("").reverse().join("")), 10)
-        ),
-      deserialize: (value) =>
-        new Promise((resolve) =>
-          setTimeout(() => resolve(value.split("").reverse().join("")), 10)
-        ),
+    const asyncSerializer: Serializer<TestBlob<string>> = {
+      serialize: async (value) => {
+        await delay(10);
+        return JSON.stringify(value).split("").reverse().join("");
+      },
+      deserialize: async (value) => {
+        await delay(10);
+        return JSON.parse(value.split("").reverse().join(""));
+      },
     };
 
     it("should handle async serialization", async () => {
       const { result } = renderHook(() =>
-        useLocalStorage<string>("test-key", { serializer: asyncSerializer })
+        useLocalStorage<TestBlob<string>>("test-key", {
+          serializer: asyncSerializer,
+        })
       );
 
       await waitFor(() => {
@@ -394,23 +440,25 @@ describe("useLocalStorage", () => {
       });
 
       await act(async () => {
-        await result.current.setValue("hello");
+        await result.current.setValue({ testValue: "hello" });
       });
 
       await waitFor(() => {
-        expect(localStorage.getItem("test-key")).toBe("olleh");
+        expect(localStorage.getItem("test-key")).toBe('}"olleh":"eulaVtset"{');
       });
     });
 
     it("should handle async deserialization", async () => {
-      localStorage.setItem("test-key", "olleh");
+      localStorage.setItem("test-key", '}"olleh":"eulaVtset"{');
 
       const { result } = renderHook(() =>
-        useLocalStorage<string>("test-key", { serializer: asyncSerializer })
+        useLocalStorage<TestBlob<string>>("test-key", {
+          serializer: asyncSerializer,
+        })
       );
 
       await waitFor(() => {
-        expect(result.current.value).toBe("hello");
+        expect(result.current.value).toStrictEqual({ testValue: "hello" });
       });
     });
   });
@@ -418,10 +466,10 @@ describe("useLocalStorage", () => {
   describe("Multiple Hooks", () => {
     it("should sync multiple hooks with the same key", async () => {
       const { result: result1 } = renderHook(() =>
-        useLocalStorage<string>("shared-key")
+        useLocalStorage<TestBlob<string>>("shared-key")
       );
       const { result: result2 } = renderHook(() =>
-        useLocalStorage<string>("shared-key")
+        useLocalStorage<TestBlob<string>>("shared-key")
       );
 
       await waitFor(() => {
@@ -430,21 +478,25 @@ describe("useLocalStorage", () => {
       });
 
       act(() => {
-        result1.current.setValue("shared-value");
+        result1.current.setValue({ testValue: "shared-value" });
       });
 
       await waitFor(() => {
-        expect(result1.current.value).toBe("shared-value");
-        expect(result2.current.value).toBe("shared-value");
+        expect(result1.current.value).toStrictEqual({
+          testValue: "shared-value",
+        });
+        expect(result2.current.value).toStrictEqual({
+          testValue: "shared-value",
+        });
       });
     });
 
     it("should not interfere with hooks using different keys", async () => {
       const { result: result1 } = renderHook(() =>
-        useLocalStorage<string>("key1")
+        useLocalStorage<TestBlob<string>>("key1")
       );
       const { result: result2 } = renderHook(() =>
-        useLocalStorage<string>("key2")
+        useLocalStorage<TestBlob<string>>("key2")
       );
 
       await waitFor(() => {
@@ -453,24 +505,24 @@ describe("useLocalStorage", () => {
       });
 
       act(() => {
-        result1.current.setValue("value1");
+        result1.current.setValue({ testValue: "value1" });
       });
 
       await waitFor(() => {
-        expect(result1.current.value).toBe("value1");
+        expect(result1.current.value).toStrictEqual({ testValue: "value1" });
       });
 
       expect(result2.current.value).toBeUndefined();
 
       act(() => {
-        result2.current.setValue("value2");
+        result2.current.setValue({ testValue: "value2" });
       });
 
       await waitFor(() => {
-        expect(result2.current.value).toBe("value2");
+        expect(result2.current.value).toStrictEqual({ testValue: "value2" });
       });
 
-      expect(result1.current.value).toBe("value1");
+      expect(result1.current.value).toStrictEqual({ testValue: "value1" });
     });
   });
 
@@ -478,7 +530,9 @@ describe("useLocalStorage", () => {
     it("should handle JSON parse errors gracefully", async () => {
       localStorage.setItem("test-key", "invalid-json{");
 
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.value).toBeUndefined();
@@ -490,7 +544,7 @@ describe("useLocalStorage", () => {
     });
 
     it("should handle serializer errors gracefully", async () => {
-      const errorSerializer: Serializer<string> = {
+      const errorSerializer: Serializer<TestBlob<string>> = {
         serialize: () => {
           throw new Error("Serialization failed");
         },
@@ -502,7 +556,9 @@ describe("useLocalStorage", () => {
       localStorage.setItem("test-key", "some-value");
 
       const { result } = renderHook(() =>
-        useLocalStorage<string>("test-key", { serializer: errorSerializer })
+        useLocalStorage<TestBlob<string>>("test-key", {
+          serializer: errorSerializer,
+        })
       );
 
       await waitFor(() => {
@@ -517,7 +573,9 @@ describe("useLocalStorage", () => {
     it("should clear error when a valid value is set", async () => {
       localStorage.setItem("test-key", "invalid-json{");
 
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.error).toBeInstanceOf(LocalStorageError);
@@ -535,28 +593,32 @@ describe("useLocalStorage", () => {
     });
 
     it("should throw LocalStorageError when serializer fails during setValue", async () => {
-      const errorSerializer: Serializer<string> = {
+      const errorSerializer: Serializer<TestBlob<string>> = {
         serialize: () => {
           throw new Error("Serialization failed during set");
         },
-        deserialize: (value) => value, // Deserialization won't be called in this test path
+        deserialize: (value) => ({ testValue: value }), // Deserialization won't be called in this test path
       };
 
       const { result } = renderHook(() =>
-        useLocalStorage<string>("test-key", { serializer: errorSerializer })
+        useLocalStorage<TestBlob<string>>("test-key", {
+          serializer: errorSerializer,
+        })
       );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      await expect(() => result.current.setValue("value-to-serialize")).rejects.toThrow(LocalStorageError)
+      await expect(() =>
+        result.current.setValue({ testValue: "value-to-serialize" })
+      ).rejects.toThrow(LocalStorageError);
       await waitFor(() => expect(localStorage.getItem("test-key")).toBeNull());
     });
 
     it("should throw LocalStorageError when serializer fails during deserialization", async () => {
-      const errorSerializer: Serializer<string> = {
-        serialize: (value) => value,
+      const errorSerializer: Serializer<TestBlob<string>> = {
+        serialize: (value) => value.testValue,
         deserialize: () => {
           throw new Error("Deserialization failed during read");
         },
@@ -565,7 +627,9 @@ describe("useLocalStorage", () => {
       localStorage.setItem("test-key", "some-value");
 
       const { result } = renderHook(() =>
-        useLocalStorage<string>("test-key", { serializer: errorSerializer })
+        useLocalStorage<TestBlob<string>>("test-key", {
+          serializer: errorSerializer,
+        })
       );
 
       await waitFor(() => {
@@ -586,7 +650,7 @@ describe("useLocalStorage", () => {
   describe("setValue Callback Stability", () => {
     it("should maintain setValue reference when key does not change", async () => {
       const { result, rerender } = renderHook(() =>
-        useLocalStorage<string>("test-key")
+        useLocalStorage<TestBlob<string>>("test-key")
       );
 
       await waitFor(() => {
@@ -602,7 +666,7 @@ describe("useLocalStorage", () => {
 
     it("should update setValue reference when key changes", async () => {
       const { result, rerender } = renderHook(
-        ({ key }) => useLocalStorage<string>(key),
+        ({ key }) => useLocalStorage<TestBlob<string>>(key),
         { initialProps: { key: "key1" } }
       );
 
@@ -624,130 +688,150 @@ describe("useLocalStorage", () => {
 
   describe("Edge Cases", () => {
     it("should handle empty string values", async () => {
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
       act(() => {
-        result.current.setValue("");
+        result.current.setValue({ testValue: "" });
       });
 
       await waitFor(
         () => {
-          expect(result.current.value).toBe("");
+          expect(result.current.value).toStrictEqual({ testValue: "" });
         },
         { timeout: 2000 }
       );
 
-      expect(localStorage.getItem("test-key")).toBe(JSON.stringify(""));
+      expect(localStorage.getItem("test-key")).toBe(
+        JSON.stringify({ testValue: "" })
+      );
     });
 
     it("should handle zero values", async () => {
-      const { result } = renderHook(() => useLocalStorage<number>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<number>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
       act(() => {
-        result.current.setValue(0);
+        result.current.setValue({ testValue: 0 });
       });
 
       await waitFor(
         () => {
-          expect(result.current.value).toBe(0);
+          expect(result.current.value).toStrictEqual({ testValue: 0 });
         },
         { timeout: 2000 }
       );
 
-      expect(localStorage.getItem("test-key")).toBe(JSON.stringify(0));
+      expect(localStorage.getItem("test-key")).toBe(
+        JSON.stringify({ testValue: 0 })
+      );
     });
 
     it("should handle false boolean values", async () => {
-      const { result } = renderHook(() => useLocalStorage<boolean>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<boolean>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
       act(() => {
-        result.current.setValue(false);
+        result.current.setValue({ testValue: false });
       });
 
       await waitFor(
         () => {
-          expect(result.current.value).toBe(false);
+          expect(result.current.value).toStrictEqual({ testValue: false });
         },
         { timeout: 2000 }
       );
 
-      expect(localStorage.getItem("test-key")).toBe(JSON.stringify(false));
+      expect(localStorage.getItem("test-key")).toBe(
+        JSON.stringify({ testValue: false })
+      );
     });
 
     it("should handle rapid successive setValue calls", async () => {
-      const { result } = renderHook(() => useLocalStorage<number>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<number>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
       act(() => {
-        result.current.setValue(1);
-        result.current.setValue(2);
-        result.current.setValue(3);
+        result.current.setValue({ testValue: 1 });
+        result.current.setValue({ testValue: 2 });
+        result.current.setValue({ testValue: 3 });
       });
 
       await waitFor(
         () => {
-          expect(result.current.value).toBe(3);
+          expect(result.current.value).toStrictEqual({ testValue: 3 });
         },
         { timeout: 2000 }
       );
 
-      expect(localStorage.getItem("test-key")).toBe(JSON.stringify(3));
+      expect(localStorage.getItem("test-key")).toBe(
+        JSON.stringify({ testValue: 3 })
+      );
     });
 
     it("should handle special characters in keys", async () => {
       const specialKey = "test-key:with@special#characters$";
-      const { result } = renderHook(() => useLocalStorage<string>(specialKey));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>(specialKey)
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
       act(() => {
-        result.current.setValue("test-value");
+        result.current.setValue({ testValue: "test-value" });
       });
 
       await waitFor(
         () => {
-          expect(result.current.value).toBe("test-value");
+          expect(result.current.value).toStrictEqual({ testValue: "test-value" });
         },
         { timeout: 2000 }
       );
 
       expect(localStorage.getItem(specialKey)).toBe(
-        JSON.stringify("test-value")
+        JSON.stringify({testValue:"test-value"})
       );
     });
 
     it("should handle very long strings", async () => {
       const longString = "a".repeat(10000);
-      const { result } = renderHook(() => useLocalStorage<string>("test-key"));
+      const { result } = renderHook(() =>
+        useLocalStorage<TestBlob<string>>("test-key")
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
       act(() => {
-        result.current.setValue(longString);
+        result.current.setValue({ testValue: longString });
       });
 
       await waitFor(
         () => {
-          expect(result.current.value).toBe(longString);
+          expect(result.current.value).toStrictEqual({ testValue: longString });
         },
         { timeout: 2000 }
       );
