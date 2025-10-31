@@ -1,5 +1,11 @@
 # @rm-hull/use-local-storage
 
+## 0.3.1
+
+### Patch Changes
+
+- 360bd7f: Revert changes from #34 (may come back to this later)
+
 ## 0.3.0
 
 ### Minor Changes
