@@ -509,6 +509,9 @@ describe("useLocalStorage", () => {
       });
 
       expect(consoleErrorSpy).toHaveBeenCalled();
+      const errorCall = consoleErrorSpy.mock.calls[0];
+      expect(errorCall[0]).toContain("Error deserializing localStorage key \"test-key\"");
+      expect(errorCall[1]).toBeInstanceOf(Error);
       consoleErrorSpy.mockRestore();
     });
   });
