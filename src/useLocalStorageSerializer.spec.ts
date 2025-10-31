@@ -26,8 +26,8 @@ describe('useLocalStorage with serializer', () => {
       useLocalStorage(KEY, { serializer: reverseSerializer })
     );
 
-    act(() => {
-      result.current.setValue('hello');
+    await act(async () => {
+      await result.current.setValue('hello');
     });
 
     await waitFor(() => {
