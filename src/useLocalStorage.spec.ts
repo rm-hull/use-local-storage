@@ -17,10 +17,14 @@ describe("useLocalStorage", () => {
   });
 
   describe("Initial State", () => {
-    it("should start with isLoading true", () => {
+    it("should start with isLoading true", async () => {
       const { result } = renderHook(() => useLocalStorage<string>("test-key"));
       const { isLoading } = result.current;
       expect(isLoading).toBe(true);
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
     });
 
     it("should set isLoading to false after initialization", async () => {
@@ -125,9 +129,13 @@ describe("useLocalStorage", () => {
   });
 
   describe("setValue", () => {
-    it("should provide a setValue function", () => {
+    it("should provide a setValue function", async () => {
       const { result } = renderHook(() => useLocalStorage<string>("test-key"));
       expect(typeof result.current.setValue).toBe("function");
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
     });
 
     it("should update the value in localStorage", async () => {
@@ -231,7 +239,9 @@ describe("useLocalStorage", () => {
         result.current.setValue("test-value");
       });
 
-      expect(eventListener).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(eventListener).toHaveBeenCalled();
+      });
 
       window.removeEventListener("local-storage", eventListener);
     });
