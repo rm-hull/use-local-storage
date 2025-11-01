@@ -1,5 +1,11 @@
 # @rm-hull/use-local-storage
 
+## 0.3.2
+
+### Patch Changes
+
+- bad3ec0: Use cause on error rathern than NIH
+
 ## 0.3.1
 
 ### Patch Changes
