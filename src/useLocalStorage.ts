@@ -43,7 +43,7 @@ async function readValue<T>(
   } catch (error) {
     throw new LocalStorageError(
       `Error deserializing localStorage key "${key}"`,
-      error as Error
+      { cause: error }
     );
   }
 }
@@ -121,7 +121,7 @@ export const useLocalStorage = <T>(
     const readValueFromStorage = () => {
       readValue<T>(key, serializer)
         .then((newValue) => {
-          setError(undefined)
+          setError(undefined);
           updateValue(newValue);
         })
         .catch((error) => {
@@ -157,7 +157,9 @@ export const useLocalStorage = <T>(
   }, [key, serializer, setStoredValue]);
 
   return {
-    value: error ? undefined : (storedValue?.[key] as T) ?? options?.initialValue,
+    value: error
+      ? undefined
+      : (storedValue?.[key] as T) ?? options?.initialValue,
     setValue: useCallback(
       (value?: T) => setValue(key, serializer, value),
       [key, serializer]
