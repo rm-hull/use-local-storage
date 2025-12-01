@@ -30,7 +30,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
-        run: yarn install --immutable-cache
+        run: yarn install --immutable
 
       - name: Lint
         run: yarn lint
@@ -76,7 +76,7 @@ jobs:
         run: npm install --global npm@^11
 
       - name: Install dependencies
-        run: yarn install --immutable-cache
+        run: yarn install --immutable
 
       - name: Download build artifacts
         uses: actions/download-artifact@v6

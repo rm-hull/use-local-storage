@@ -12,7 +12,7 @@ The project uses Yarn for package management.
 
 -   **Install Dependencies:**
     ```bash
-    yarn install --immutable-cache
+    yarn install --immutable
     ```
 
 -   **Run Development Server:**
