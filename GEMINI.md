@@ -12,7 +12,7 @@ The project uses Yarn for package management.
 
 -   **Install Dependencies:**
     ```bash
-    yarn install --frozen-lockfile
+    yarn install --immutable-cache
     ```
 
 -   **Run Development Server:**
