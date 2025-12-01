@@ -1,5 +1,11 @@
 # @rm-hull/use-local-storage
 
+## 0.3.3
+
+### Patch Changes
+
+- 4c8978a: Configure trusted releases with provenance
+
 ## 0.3.2
 
 ### Patch Changes
