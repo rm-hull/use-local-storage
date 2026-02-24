@@ -1460,7 +1460,7 @@ __metadata:
     "@testing-library/dom": "npm:^10.4.1"
     "@testing-library/jest-dom": "npm:^6.9.1"
     "@testing-library/react": "npm:^16.3.2"
-    "@types/jsdom": "npm:^27.0.0"
+    "@types/jsdom": "npm:^28.0.0"
     "@types/node": "npm:^25.3.0"
     "@types/react": "npm:^19.2.14"
     "@types/react-dom": "npm:^19.2.3"
@@ -1780,14 +1780,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jsdom@npm:^27.0.0":
-  version: 27.0.0
-  resolution: "@types/jsdom@npm:27.0.0"
+"@types/jsdom@npm:^28.0.0":
+  version: 28.0.0
+  resolution: "@types/jsdom@npm:28.0.0"
   dependencies:
     "@types/node": "npm:*"
     "@types/tough-cookie": "npm:*"
     parse5: "npm:^7.0.0"
-  checksum: 10c0/1ec7ff7177e1f7266e51279f07f3cd013e1713766b01eebceac783061675b31c672a47b0a508dcbaf040f7f22d90405858378c6c5358991989fbe8b95adde354
+    undici-types: "npm:^7.21.0"
+  checksum: 10c0/7b4b06dee1c611e37766ae2c5f92b0a881e3a2da8e38cc34999e812ab030b54b7250b0b9cc9af24dbeadc0fc2d341cc4e0adc5e5ca7d624d134ced1414a1ea5e
   languageName: node
   linkType: hard
 
@@ -5034,6 +5035,13 @@ __metadata:
   version: 1.6.1
   resolution: "ufo@npm:1.6.1"
   checksum: 10c0/5a9f041e5945fba7c189d5410508cbcbefef80b253ed29aa2e1f8a2b86f4bd51af44ee18d4485e6d3468c92be9bf4a42e3a2b72dcaf27ce39ce947ec994f1e6b
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:^7.21.0":
+  version: 7.22.0
+  resolution: "undici-types@npm:7.22.0"
+  checksum: 10c0/5e6f2513c41d07404c719eb7c1c499b8d4cde042f1269b3bc2be335f059e6ef53eb04f316696c728d5e8064c4d522b98f63d7ae8938adf6317351e07ae9c943e
   languageName: node
   linkType: hard
 
