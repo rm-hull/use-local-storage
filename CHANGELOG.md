@@ -1,5 +1,11 @@
 # @rm-hull/use-local-storage
 
+## 0.3.4
+
+### Patch Changes
+
+- cff0487: Updates to tsdown & various deps
+
 ## 0.3.3
 
 ### Patch Changes
