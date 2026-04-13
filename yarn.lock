@@ -1093,7 +1093,7 @@ __metadata:
     jsdom: "npm:^29.0.2"
     react: "npm:^19.2.5"
     react-dom: "npm:^19.2.5"
-    tsdown: "npm:^0.21.7"
+    tsdown: "npm:^0.21.8"
     typescript: "npm:^6.0.2"
     typescript-eslint: "npm:^8.58.1"
     vite: "npm:^8.0.8"
@@ -2304,10 +2304,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"defu@npm:^6.1.4":
-  version: 6.1.4
-  resolution: "defu@npm:6.1.4"
-  checksum: 10c0/2d6cc366262dc0cb8096e429368e44052fdf43ed48e53ad84cc7c9407f890301aa5fcb80d0995abaaf842b3949f154d060be4160f7a46cb2bc2f7726c81526f5
+"defu@npm:^6.1.7":
+  version: 6.1.7
+  resolution: "defu@npm:6.1.7"
+  checksum: 10c0/e6635388103c8be3c574ac31302f6930e5e6eeedba32cb1b30cf993c7d9fb571aec2485446dfa23bfa63e55e66156fe109027a9695db82a50f931e91e8d4bedb
   languageName: node
   linkType: hard
 
@@ -4599,10 +4599,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tinyexec@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "tinyexec@npm:1.0.4"
-  checksum: 10c0/d4a5bbcf6bdb23527a4b74c4aa566f41432167112fe76f420ec7e3a90a3ecfd3a7d944383e2719fc3987b69400f7b928daf08700d145fb527c2e80ec01e198bd
+"tinyexec@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "tinyexec@npm:1.1.1"
+  checksum: 10c0/48433cb32573a767e2b63bb92343cbbae4240d05a19a63f7869f9447491305e7bd82d11daccb79b2628b596ad703a25798226c50bfd1d8e63477fb42af6a5b35
   languageName: node
   linkType: hard
 
@@ -4613,6 +4613,16 @@ __metadata:
     fdir: "npm:^6.5.0"
     picomatch: "npm:^4.0.3"
   checksum: 10c0/869c31490d0d88eedb8305d178d4c75e7463e820df5a9b9d388291daf93e8b1eb5de1dad1c1e139767e4269fe75f3b10d5009b2cc14db96ff98986920a186844
+  languageName: node
+  linkType: hard
+
+"tinyglobby@npm:^0.2.16":
+  version: 0.2.16
+  resolution: "tinyglobby@npm:0.2.16"
+  dependencies:
+    fdir: "npm:^6.5.0"
+    picomatch: "npm:^4.0.4"
+  checksum: 10c0/f2e09fd93dd95c41e522113b686ff6f7c13020962f8698a864a257f3d7737599afc47722b7ab726e12f8a813f779906187911ff8ee6701ede65072671a7e934b
   languageName: node
   linkType: hard
 
@@ -4686,30 +4696,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsdown@npm:^0.21.7":
-  version: 0.21.7
-  resolution: "tsdown@npm:0.21.7"
+"tsdown@npm:^0.21.8":
+  version: 0.21.8
+  resolution: "tsdown@npm:0.21.8"
   dependencies:
     ansis: "npm:^4.2.0"
     cac: "npm:^7.0.0"
-    defu: "npm:^6.1.4"
+    defu: "npm:^6.1.7"
     empathic: "npm:^2.0.0"
     hookable: "npm:^6.1.0"
     import-without-cache: "npm:^0.2.5"
     obug: "npm:^2.1.1"
     picomatch: "npm:^4.0.4"
-    rolldown: "npm:1.0.0-rc.12"
+    rolldown: "npm:1.0.0-rc.15"
     rolldown-plugin-dts: "npm:^0.23.2"
     semver: "npm:^7.7.4"
-    tinyexec: "npm:^1.0.4"
-    tinyglobby: "npm:^0.2.15"
+    tinyexec: "npm:^1.1.1"
+    tinyglobby: "npm:^0.2.16"
     tree-kill: "npm:^1.2.2"
     unconfig-core: "npm:^7.5.0"
     unrun: "npm:^0.2.34"
   peerDependencies:
     "@arethetypeswrong/core": ^0.18.1
-    "@tsdown/css": 0.21.7
-    "@tsdown/exe": 0.21.7
+    "@tsdown/css": 0.21.8
+    "@tsdown/exe": 0.21.8
     "@vitejs/devtools": "*"
     publint: ^0.3.0
     typescript: ^5.0.0 || ^6.0.0
@@ -4731,7 +4741,7 @@ __metadata:
       optional: true
   bin:
     tsdown: dist/run.mjs
-  checksum: 10c0/dfb25e50fd64e93bafd2d148eab3bbc6bf2dcdfa7aed47aa875ed12a16202d7b8076e7b9498ef3624bc9dcbc618632bce87a09e70a8afab914079ffe12012cec
+  checksum: 10c0/daa7bf1ff9ef59724372b66aae68c1bce47a3996f28dce057d0addb06014eb63d12e6af9069fb636155debc9b2ca976f082250ed1a7d0e7e6135b440715497d6
   languageName: node
   linkType: hard
 
