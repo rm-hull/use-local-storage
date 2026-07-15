@@ -1053,7 +1053,7 @@ __metadata:
     jsdom: "npm:^29.1.1"
     react: "npm:^19.2.7"
     react-dom: "npm:^19.2.7"
-    tsdown: "npm:^0.22.7"
+    tsdown: "npm:^0.22.8"
     typescript: "npm:^6.0.2"
     typescript-eslint: "npm:^8.64.0"
     vite: "npm:^8.1.4"
@@ -4124,7 +4124,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rolldown-plugin-dts@npm:^0.27.8":
+"rolldown-plugin-dts@npm:^0.27.9":
   version: 0.27.9
   resolution: "rolldown-plugin-dts@npm:0.27.9"
   dependencies:
@@ -4643,9 +4643,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsdown@npm:^0.22.7":
-  version: 0.22.7
-  resolution: "tsdown@npm:0.22.7"
+"tsdown@npm:^0.22.8":
+  version: 0.22.8
+  resolution: "tsdown@npm:0.22.8"
   dependencies:
     ansis: "npm:^4.3.1"
     cac: "npm:^7.0.0"
@@ -4656,7 +4656,7 @@ __metadata:
     obug: "npm:^2.1.3"
     picomatch: "npm:^4.0.5"
     rolldown: "npm:~1.1.5"
-    rolldown-plugin-dts: "npm:^0.27.8"
+    rolldown-plugin-dts: "npm:^0.27.9"
     semver: "npm:^7.8.5"
     tinyexec: "npm:^1.2.4"
     tinyglobby: "npm:^0.2.17"
@@ -4664,8 +4664,8 @@ __metadata:
     unconfig-core: "npm:^7.5.0"
   peerDependencies:
     "@arethetypeswrong/core": ^0.18.1
-    "@tsdown/css": 0.22.7
-    "@tsdown/exe": 0.22.7
+    "@tsdown/css": 0.22.8
+    "@tsdown/exe": 0.22.8
     "@vitejs/devtools": "*"
     publint: ^0.3.8
     tsx: "*"
@@ -4693,7 +4693,7 @@ __metadata:
       optional: true
   bin:
     tsdown: ./dist/run.mjs
-  checksum: 10c0/9ae2daa2070a479381781d5b8de7013fb4dbbbdcf489bd3ac86dd6987f532018ebbfa9bf0ad19b5aa0d1df92bcb8d2e9810352a2f5803f57052c98d3b1bf05a6
+  checksum: 10c0/96bacdf7685c4e13d6cd708c99e78e0aa688df9005b94dae0ff9a3d32860412d6fa6242038d166d577e715b34389fe0f1a4920b814e5e01693f5fae7e9507320
   languageName: node
   linkType: hard
 
