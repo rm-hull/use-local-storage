@@ -1049,7 +1049,7 @@ __metadata:
     eslint-plugin-react-hooks: "npm:^7.1.1"
     eslint-plugin-react-refresh: "npm:^0.5.3"
     globals: "npm:^17.7.0"
-    jotai: "npm:^2.20.1"
+    jotai: "npm:^2.20.2"
     jsdom: "npm:^29.1.1"
     react: "npm:^19.2.7"
     react-dom: "npm:^19.2.7"
@@ -3130,9 +3130,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jotai@npm:^2.20.1":
-  version: 2.20.1
-  resolution: "jotai@npm:2.20.1"
+"jotai@npm:^2.20.2":
+  version: 2.20.2
+  resolution: "jotai@npm:2.20.2"
   peerDependencies:
     "@babel/core": ">=7.0.0"
     "@babel/template": ">=7.0.0"
@@ -3147,7 +3147,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: 10c0/a0d5104784efd5328aa25e29bb8e4e51d91c87d78afd0edd5dc90cdd1ee735828d3987adfcbe35b817ed921e6742794a0523b71467df49f52964c2275d6284f0
+  checksum: 10c0/8c9cbdcc2956cbe9b78f61e8ffe3018f7c7cd7efbb8260e7996dba4ac7cc9ee5e2fc53d5c218d9b5f04052672535be9fa7848293b8a35410d17112f95e6395b0
   languageName: node
   linkType: hard
 
