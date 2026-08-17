@@ -119,7 +119,7 @@ jobs:
 
       - name: Create GitHub release
         if: steps.version.outputs.has_changes == 'true'
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
           createGithubReleases: true
         env:
