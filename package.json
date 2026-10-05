@@ -41,7 +41,7 @@
     "react": ">=19.0.0"
   },
   "dependencies": {
-    "jotai": "^3.0.0",
+    "jotai": "^3.0.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
